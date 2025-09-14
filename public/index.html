@@ -5,50 +5,61 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Linux Campaign — Light</title>
 <style>
-  :root{
-    --bg:#f5f7fb; --card:#ffffff; --brd:#e6e8ef; --txt:#0f172a; --muted:#64748b;
-    --acc:#2563eb; --ok:#16a34a; --warn:#eab308; --err:#dc2626; --radius:16px;
-  }
-  *{box-sizing:border-box} html,body{height:100%}
-  body{margin:0;background:linear-gradient(180deg,#fbfdff,#f5f7fb);color:var(--txt);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
+  :root{--bg:#f5f7fb;--card:#fff;--brd:#e6e8ef;--txt:#0f172a;--muted:#64748b;--acc:#2563eb;--radius:16px}
+  *{box-sizing:border-box}html,body{height:100%}body{margin:0;background:linear-gradient(180deg,#fbfdff,#f5f7fb);color:var(--txt);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
   .layout{display:grid;grid-template-columns:260px 1fr;height:100vh}
   .glass{background:var(--card);border:1px solid var(--brd);border-radius:var(--radius);box-shadow:0 8px 26px rgba(15,23,42,.06)}
   header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
-  .nav{padding:12px} .nav a{display:block;padding:10px 12px;margin:6px 0;border-radius:12px;text-decoration:none;color:var(--txt)}
+  .nav{padding:12px}.nav a{display:block;padding:10px 12px;margin:6px 0;border-radius:12px;text-decoration:none;color:var(--txt)}
   .nav a.active{background:rgba(37,99,235,.08)}
   input,textarea,select{width:100%;background:#fff;border:1px solid var(--brd);border-radius:12px;padding:10px}
   .btn{border:1px solid var(--brd);background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer}
   .btn.primary{background:linear-gradient(180deg,#60a5fa,#2563eb);color:#f8fafc;border-color:#3b82f6}
   .btn.warn{background:linear-gradient(180deg,#fde68a,#eab308)}
-  .btn.danger{background:linear-gradient(180deg,#fecaca,#dc2626);color:#7f1d1d}
+  .btn.danger{background:linear-gradient(180deg,#fecaca,#ef4444);color:#7f1d1d}
   .badge{display:inline-block;background:#eef2ff;color:#1e3a8a;border-radius:999px;padding:4px 10px;font-size:12px}
-  .muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .row{display:grid;gap:12px} @media(min-width:900px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:repeat(3,1fr)}}
-  table{width:100%;border-collapse:collapse} thead th{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid var(--brd);text-align:right;padding:10px}
+  .muted{color:var(--muted)}.mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .row{display:grid;gap:12px}@media(min-width:900px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:repeat(3,1fr)}}
+  table{width:100%;border-collapse:collapse}thead th{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid var(--brd);text-align:right;padding:10px}
   tbody td{border-bottom:1px solid var(--brd);padding:8px}
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
-  .hidden{display:none !important}
+  .hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN (Phone + OTP) -->
 <div id="loginOverlay" class="overlay">
   <div class="glass" style="width:min(92vw,420px);padding:18px">
     <h1 style="margin:0;text-align:center;font-weight:800">Linux <span style="color:var(--acc)">Campaign</span></h1>
-    <p id="loginSubtitle" class="muted" style="text-align:center;margin:.4rem 0 1rem">تسجيل دخول محلي (بدون Firebase)</p>
-    <div class="row">
-      <div><label id="lblUser" style="font-size:12px">المستخدم</label><input id="adminUser" placeholder="admin"></div>
-      <div><label id="lblPass" style="font-size:12px">كلمة المرور</label><input id="adminPass" type="password" placeholder="••••••••"></div>
-      <button id="adminLoginBtn" type="button" class="btn primary" onclick="doLogin()">دخول</button>
-      <p id="loginError" class="muted hidden" style="color:#b91c1c">بيانات الدخول غير صحيحة.</p>
+    <p class="muted" style="text-align:center;margin:.4rem 0 1rem">تسجيل برقم الموبايل</p>
+
+    <!-- Step 1: Phone -->
+    <div class="row" id="stepPhone">
+      <div>
+        <label style="font-size:12px">رقم الموبايل</label>
+        <input id="phoneInput" inputmode="numeric" placeholder="01030488828" autocomplete="off">
+      </div>
+      <button id="sendCodeBtn" type="button" class="btn primary" onclick="requestCode()">متابعة</button>
+      <p id="phoneError" class="muted hidden" style="color:#b91c1c">الرقم غير صحيح.</p>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div class="row hidden" id="stepCode">
+      <div>
+        <label style="font-size:12px">رمز التحقق</label>
+        <input id="codeInput" inputmode="numeric" placeholder="أدخل الرمز" autocomplete="one-time-code">
+      </div>
+      <button id="verifyBtn" type="button" class="btn primary" onclick="verifyCode()">تأكيد الدخول</button>
+      <button type="button" class="btn" onclick="backToPhone()">رجوع</button>
+      <p id="codeError" class="muted hidden" style="color:#b91c1c">الرمز غير صحيح.</p>
     </div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app" class="layout hidden">
-  <aside class="glass" style="margin:8px 8px 8px 8px;padding:10px;display:flex;flex-direction:column">
+  <aside class="glass" style="margin:8px;padding:10px;display:flex;flex-direction:column">
     <div style="height:64px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--brd)">
       <h2 style="margin:0;font-weight:800;font-size:18px">Linux <span style="color:var(--acc)">Campaign</span></h2>
     </div>
@@ -72,10 +83,6 @@
         <span id="pageName" class="muted">غير متصل</span>
         <span id="statusDot" style="width:10px;height:10px;border-radius:999px;background:#ef4444;display:inline-block"></span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span id="langLabel" class="badge">AR</span>
-        <button id="langToggle" class="btn" type="button">EN</button>
-      </div>
     </header>
 
     <div id="bannerDisconnected" class="glass" style="margin:8px 8px 0 0;padding:8px;color:#9a6700;background:#fffbe6;border:1px solid #ffe58f">
@@ -86,7 +93,7 @@
   </section>
 </div>
 
-<!-- TEMPLATES (مخففة) -->
+<!-- ==== أمثلة قوالب مختصرة (يمكن تحتفظ بالباقي كما في نسختك) ==== -->
 <template id="tpl-dashboard">
   <div class="row cols-3">
     <div class="glass" style="padding:12px"><div class="muted">إجمالي الجمهور</div><div id="statTotal" style="font-size:28px;font-weight:800">0</div></div>
@@ -95,256 +102,41 @@
   </div>
 </template>
 
-<template id="tpl-audience">
-  <div class="row">
-    <div class="glass" style="padding:10px;display:grid;grid-template-columns:1fr auto;gap:8px">
-      <b>مركز التحكم بالجمهور</b>
-      <div style="display:flex;gap:8px;justify-content:end;flex-wrap:wrap">
-        <button id="btnFetchStart"  class="btn primary" type="button">بدء السحب</button>
-        <button id="btnFetchPause"  class="btn warn" type="button">إيقاف مؤقت</button>
-        <button id="btnFetchResume" class="btn" type="button">استئناف</button>
-        <button id="btnFetchStop"   class="btn danger" type="button">إيقاف نهائي</button>
-        <button id="btnSaveWhole"   class="btn" type="button">حفظ الجمهور المسحوب</button>
-      </div>
-      <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;font-size:13px">
-        <span class="badge">المجموع: <b id="audCount">0</b></span>
-        <span class="badge">المحدد: <b id="selCount">0</b></span>
-        <span class="badge">الحالة: <b id="fetchState">متوقف</b></span>
-        <span class="badge">الصفحة الحالية: <b id="fetchPage">—</b></span>
-        <span class="badge">المضاف حديثًا: <b id="fetchAdded">0</b></span>
-      </div>
-    </div>
-
-    <div class="glass" style="padding:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button id="btnSaveAud" class="btn warn" type="button">حفظ المحددين</button>
-      <button id="btnExportCSV" class="btn" type="button">تصدير CSV</button>
-      <button id="btnClearAll" class="btn danger" type="button">حذف كل الجمهور</button>
-      <div style="margin-inline-start:auto;display:flex;gap:8px;align-items:center">
-        <input id="filterTxt" placeholder="فلترة بالاسم أو ID" style="width:220px">
-        <button id="btnApplyFilter" class="btn" type="button">فلترة</button>
-        <button id="btnResetFilter" class="btn" type="button">إلغاء</button>
-      </div>
-    </div>
-
-    <div class="glass" style="padding:0">
-      <div style="max-height:60vh;overflow:auto">
-        <table>
-          <thead><tr><th style="width:26px"></th><th>المستخدم</th><th>ID</th></tr></thead>
-          <tbody id="audTable"></tbody>
-        </table>
-      </div>
-      <div id="audPager" style="padding:8px;display:flex;align-items:center;justify-content:center;gap:8px"></div>
-    </div>
-
-    <div class="glass" style="padding:10px">
-      <b>قوائم الجمهور المحفوظة</b>
-      <div id="audSaved" class="row"></div>
-    </div>
-  </div>
-</template>
-
-<template id="tpl-auddata">
-  <div class="row">
-    <div class="glass" style="padding:10px;display:flex;justify-content:space-between;align-items:center">
-      <b>قوائم “بيانات الجمهور”</b>
-      <button id="btnExportAllAud" class="btn" type="button">تصدير كل القوائم CSV</button>
-    </div>
-    <div id="audDataWrap" class="row cols-3"></div>
-    <p id="audDataEmpty" class="muted hidden" style="text-align:center">لا توجد قوائم محفوظة بعد.</p>
-  </div>
-</template>
-
-<template id="tpl-content">
-  <div class="row cols-2">
-    <div class="glass" style="padding:10px">
-      <b>مكتبة الصور</b>
-      <div class="row" style="margin-top:8px">
-        <input id="imgName" placeholder="اسم الصورة">
-        <input id="imgFile" type="file" accept="image/*">
-        <button id="btnSaveImg" class="btn primary" type="button">حفظ الصورة</button>
-      </div>
-      <div id="imgList" class="row" style="margin-top:8px"></div>
-    </div>
-    <div class="glass" style="padding:10px">
-      <b>مكتبة النصوص</b>
-      <div class="row" style="margin-top:8px">
-        <input id="capName" placeholder="اسم النص">
-        <textarea id="capText" placeholder="النص" style="min-height:110px"></textarea>
-        <button id="btnSaveCap" class="btn primary" type="button">حفظ النص</button>
-      </div>
-      <div id="capList" class="row" style="margin-top:8px"></div>
-    </div>
-  </div>
-</template>
-
-<template id="tpl-campaigns">
-  <div class="row cols-2">
-    <div class="glass" style="padding:10px">
-      <div class="row">
-        <div><label style="font-size:12px">اختر جمهورك</label><select id="ddAudience"></select></div>
-        <div><label style="font-size:12px">الصورة</label><select id="ddImage"></select><input id="imgUrl" placeholder="أو أدخل رابط صورة" style="margin-top:8px"></div>
-        <div><label style="font-size:12px">النص</label><select id="ddCaption"></select><textarea id="msgText" style="margin-top:8px;min-height:110px" placeholder="أو اكتب رسالتك"></textarea></div>
-        <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
-          <div><label style="font-size:12px">الفاصل (ثانية)</label><input id="delay" type="number" value="0" min="0" style="width:90px"></div>
-          <button id="btnStart"  class="btn primary" type="button">بدء الإرسال</button>
-          <button id="btnPause"  class="btn warn" type="button">إيقاف مؤقت</button>
-          <button id="btnResume" class="btn" type="button">استئناف</button>
-          <button id="btnStop"   class="btn danger" type="button">إيقاف نهائي</button>
-          <span style="margin-inline-start:auto">التقدم: <b id="sendProg">0/0</b></span>
-        </div>
-      </div>
-    </div>
-    <div class="glass" style="padding:10px">
-      <b>قائمة الإرسال (<span id="targetCount">0</span>)</b>
-      <div id="sendList" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto"></div>
-    </div>
-  </div>
-</template>
-
-<template id="tpl-reports">
-  <div id="reportsWrap" class="row cols-3"></div>
-  <p id="noReports" class="muted hidden" style="text-align:center">لا توجد تقارير بعد.</p>
-</template>
-
-<template id="tpl-settings">
-  <div class="row cols-2">
-    <div class="glass" style="padding:10px">
-      <b>إعدادات الاتصال</b>
-      <div class="row" style="margin-top:8px">
-        <input id="pageId" placeholder="Page ID">
-        <input id="accessToken" placeholder="Page Access Token">
-        <button id="btnConnect" class="btn primary" type="button">حفظ والاتصال</button>
-      </div>
-    </div>
-    <div class="glass" style="padding:10px">
-      <b>جلسة المستخدم</b>
-      <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-        <span class="badge">admin</span>
-        <button id="btnLogout" class="btn" type="button">تسجيل الخروج</button>
-        <button id="btnClearCache" class="btn danger" type="button">تفريغ كل البيانات</button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script>
-/* ===== Helpers/State ===== */
-const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
-const ST={connected:false,pageId:LS.get('lc_pageId',null),token:LS.get('lc_token',null),
-  users:LS.get('lc_users',[]),audiences:LS.get('lc_audiences',[]),images:LS.get('lc_images',[]),captions:LS.get('lc_captions',[]),
-  fetching:LS.get('lc_fetching',{running:false,paused:false,next:null,page:0}),fetchAdded:0,
-  sending:LS.get('lc_sending',{running:false,paused:false,idx:0,targets:[],job:null,delay:0})
-};
-const $=(s,p=document)=>p.querySelector(s); const $$=(s,p=document)=>Array.from(p.querySelectorAll(s));
-function savePersist(){LS.set('lc_users',ST.users);LS.set('lc_audiences',ST.audiences);LS.set('lc_images',ST.images);LS.set('lc_captions',ST.captions);LS.set('lc_fetching',ST.fetching);LS.set('lc_sending',ST.sending);}
-function toast(t,m){alert((t||'')+(m?'\n\n'+m:''));}
-function setConnectedUI(yes,name){$('#pageName').textContent=yes?(name||'متصل'):'غير متصل';$('#statusDot').style.background=yes?'#16a34a':'#ef4444';$('#bannerDisconnected').classList.toggle('hidden',yes);}
+/*** تسجيل الدخول بالموبايل + OTP ***/
+const ALLOWED_PHONE='01030488828';
+const OTP_CODE='012812';
+const $=(s,p=document)=>p.querySelector(s);
+const show=el=>el.classList.remove('hidden');
+const hide=el=>el.classList.add('hidden');
 
-/* ===== i18n ===== */
-const I18N={ar:{dash:"لوحة المعلومات",aud:"الجمهور",cont:"المحتوى",auddata:"بيانات الجمهور",camp:"إنشاء حملة",rep:"التقارير",set:"الإعدادات",
-  start:"بدء السحب",pause:"إيقاف مؤقت",resume:"استئناف",stop:"إيقاف نهائي",saveAll:"حفظ الجمهور المسحوب",user:"المستخدم",pass:"كلمة المرور",login:"تسجيل دخول محلي (بدون Firebase)"},
-en:{dash:"Dashboard",aud:"Audience",cont:"Content",auddata:"Saved Audiences",camp:"Campaigns",rep:"Reports",set:"Settings",
-  start:"Start",pause:"Pause",resume:"Resume",stop:"Stop",saveAll:"Save current audience",user:"Username",pass:"Password",login:"Local login (no Firebase)"}};
-function setLang(lang){
-  localStorage.setItem('lc_lang',lang);
-  document.documentElement.lang=(lang==='en'?'en':'ar');
-  document.documentElement.dir=(lang==='en'?'ltr':'rtl');
-  const L=I18N[lang]||I18N.ar;
-  $('#navDashboard').textContent=L.dash;$('#navAudience').textContent=L.aud;$('#navContent').textContent=L.cont;$('#navAuddata').textContent=L.auddata;$('#navCampaigns').textContent=L.camp;$('#navReports').textContent=L.rep;$('#navSettings').textContent=L.set;
-  $('#lblUser')?.textContent=L.user; $('#lblPass')?.textContent=L.pass; $('#loginSubtitle')?.textContent=L.login;
-  $('#langLabel').textContent=(lang==='en'?'EN':'AR'); $('#langToggle').textContent=(lang==='en'?'AR':'EN');
+function requestCode(){
+  const inp=$('#phoneInput');
+  let phone=(inp?.value||'').trim().replace(/[^\d]/g,'');
+  if(phone===ALLOWED_PHONE){ hide($('#phoneError')); hide($('#stepPhone')); show($('#stepCode')); $('#codeInput')?.focus(); }
+  else { show($('#phoneError')); }
 }
-$('#langToggle').addEventListener('click',()=>{ setLang(localStorage.getItem('lc_lang')==='en'?'ar':'en'); render(); });
-setLang(localStorage.getItem('lc_lang')||'ar');
-
-/* ===== LOGIN — Guaranteed ===== */
-function doLogin(){
-  const u=($('#adminUser')?.value||'').trim();
-  const p=($('#adminPass')?.value||'').trim();
-  const OK_USER='admin', OK_PASS='mO..012842';
-  if(u===OK_USER && p===OK_PASS){
+function backToPhone(){ hide($('#codeError')); hide($('#stepCode')); show($('#stepPhone')); $('#phoneInput')?.focus(); }
+function verifyCode(){
+  const code=($('#codeInput')?.value||'').trim();
+  if(code===OTP_CODE){
     localStorage.setItem('lc_logged','1');
-    $('#loginOverlay').classList.add('hidden');
-    $('#app').classList.remove('hidden'); $('#app').style.display='grid';
-    initAfterLogin();
-  }else{
-    $('#loginError')?.classList.remove('hidden');
-  }
+    $('#loginOverlay')?.classList.add('hidden');
+    const app=$('#app'); if(app){ app.classList.remove('hidden'); app.style.display='grid'; }
+    if(typeof initAfterLogin==='function') initAfterLogin();
+  }else{ show($('#codeError')); }
 }
-$('#adminPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+$('#phoneInput')?.addEventListener('keydown',e=>{ if(e.key==='Enter') requestCode(); });
+$('#codeInput') ?.addEventListener('keydown',e=>{ if(e.key==='Enter') verifyCode(); });
 
-/* ===== Router & Views ===== */
-const views={
-  dashboard(root){root.innerHTML=$('#tpl-dashboard').innerHTML;$('#statTotal').textContent=ST.users.length;const reps=LS.get('lc_reports',[]),sent=reps.reduce((a,c)=>a+(c.successCount||0),0),tot=reps.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);$('#statSent').textContent=sent;$('#statRate').textContent=tot?Math.round((sent/tot)*100)+'%':'0%';},
-  audience(root){root.innerHTML=$('#tpl-audience').innerHTML;bindAudienceUI();renderAudienceTable();renderSavedAudiences();updateFetchBadges();},
-  auddata(root){root.innerHTML=$('#tpl-auddata').innerHTML;renderAudDataPage();},
-  content(root){root.innerHTML=$('#tpl-content').innerHTML;$('#btnSaveImg').onclick=saveImage;$('#btnSaveCap').onclick=saveCaption;renderImgs();renderCaps();},
-  campaigns(root){root.innerHTML=$('#tpl-campaigns').innerHTML;fillCampaignDropdowns();bindCampaignControls();updateSendProgress();},
-  reports(root){root.innerHTML=$('#tpl-reports').innerHTML;renderReports();},
-  settings(root){root.innerHTML=$('#tpl-settings').innerHTML;$('#pageId').value=ST.pageId||'';$('#accessToken').value=ST.token||'';$('#btnConnect').onclick=()=>connect($('#pageId').value.trim(),$('#accessToken').value.trim());$('#btnLogout').onclick=()=>{localStorage.removeItem('lc_logged');location.reload();};$('#btnClearCache').onclick=()=>{if(confirm('تفريغ كل البيانات؟')){localStorage.clear();location.reload();}};}
-};
-function render(){const v=(location.hash||'#dashboard').slice(1);$$('.nav a').forEach(a=>a.classList.remove('active'));$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');$('#pageTitle').textContent=$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent||'';views[v]?.($('#viewRoot')); }
-window.addEventListener('hashchange',render);
+/*** عرض التطبيق إذا سبق تسجيل الدخول ***/
+function initAfterLogin(){ window.dispatchEvent(new HashChangeEvent('hashchange')); }
+if(localStorage.getItem('lc_logged')==='1'){ $('#loginOverlay')?.classList.add('hidden'); const app=$('#app'); if(app){ app.classList.remove('hidden'); app.style.display='grid'; } initAfterLogin(); }
 
-/* ===== Connect (Graph) ===== */
-async function connect(pageId,token){
-  if(!pageId||!token) return toast('خطأ','أدخل Page ID و Access Token');
-  try{
-    const res=await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name&access_token=${encodeURIComponent(token)}`);
-    const data=await res.json(); if(!res.ok||data.error) throw new Error(data.error?.message||('HTTP '+res.status));
-    ST.pageId=pageId; ST.token=token; ST.connected=true; LS.set('lc_pageId',pageId); LS.set('lc_token',token);
-    setConnectedUI(true,data.name); toast('تم الاتصال',`متصل الآن بصفحة ${data.name}`);
-  }catch(e){ setConnectedUI(false); toast('فشل الاتصال',e.message); }
-}
-
-/* ===== Audience (minimal stable) ===== */
-function bindAudienceUI(){
-  $('#btnSaveAud').onclick=saveSelectedAudience; $('#btnExportCSV').onclick=exportCSV; $('#btnClearAll').onclick=()=>{ if(confirm('حذف كل الجمهور؟')){ ST.users=[]; savePersist(); renderAudienceTable(); } };
-  $('#btnApplyFilter').onclick=()=>renderAudienceTable($('#filterTxt').value.trim()); $('#btnResetFilter').onclick=()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
-  $('#btnSaveWhole').onclick=saveWholeAudience;
-  // أزرار السحب يمكن ربطها لاحقًا بواجهة Graph حسب إذنك
-  $('#btnFetchStart').onclick=()=>toast('سحب','اربط التوكن أولاً من الإعدادات ثم نفذ السحب.');
-  $('#btnFetchPause').onclick=()=>{}; $('#btnFetchResume').onclick=()=>{}; $('#btnFetchStop').onclick=()=>{};
-}
-let AUD_PAGE=1, AUD_SIZE=100;
-function renderAudienceTable(filter=''){
-  const body=$('#audTable'); body.innerHTML='';
-  let rows=ST.users; if(filter){ rows=rows.filter(u=>(u.name||'').includes(filter)||(u.id||'').includes(filter)); }
-  const totalPages=Math.max(1,Math.ceil(rows.length/AUD_SIZE)); if(AUD_PAGE>totalPages) AUD_PAGE=totalPages;
-  const slice=rows.slice((AUD_PAGE-1)*AUD_SIZE,AUD_PAGE*AUD_SIZE);
-  slice.forEach(u=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td><input type="checkbox" data-id="${u.id}"></td><td><b>${u.name||'User'}</b></td><td class="mono">${u.id}</td>`; body.appendChild(tr); });
-  body.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=(e)=>{ const id=e.target.dataset.id; if(!ST._selected) ST._selected=new Set(); e.target.checked?ST._selected.add(id):ST._selected.delete(id); ST._selectedCount=ST._selected.size; updateFetchBadges(); });
-  $('#audPager').innerHTML=`<button class="btn" ${AUD_PAGE<=1?'disabled':''} id="pgPrev">‹</button><span class="badge">${AUD_PAGE} / ${totalPages}</span><button class="btn" ${AUD_PAGE>=totalPages?'disabled':''} id="pgNext">›</button>`;
-  $('#pgPrev')?.addEventListener('click',()=>{ if(AUD_PAGE>1){ AUD_PAGE--; renderAudienceTable($('#filterTxt').value.trim()); }});
-  $('#pgNext')?.addEventListener('click',()=>{ if(AUD_PAGE<totalPages){ AUD_PAGE++; renderAudienceTable($('#filterTxt').value.trim()); }});
-  updateFetchBadges();
-}
-function updateFetchBadges(){ $('#audCount').textContent=ST.users.length; $('#selCount').textContent=ST._selectedCount||0; $('#fetchState').textContent='متوقف'; $('#fetchPage').textContent='—'; $('#fetchAdded').textContent=ST.fetchAdded||0; }
-function exportCSV(){ const rows=[['id','name']].concat(ST.users.map(u=>[u.id||'',u.name||''])); const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n'); const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url); }
-function saveWholeAudience(){ if(!ST.users.length) return toast('لا يوجد جمهور','أضف/اسحب الجمهور أولًا.'); const name=prompt('اسم قائمة الجمهور:'); if(!name) return; ST.audiences.push({id:crypto.randomUUID(),name:name.trim(),userIds:ST.users.map(u=>u.id)}); savePersist(); renderSavedAudiences(); }
-function renderSavedAudiences(){ const box=$('#audSaved'); if(!box) return; box.innerHTML=''; ST.audiences.forEach(a=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.innerHTML=`<div><b>${a.name}</b> <span class="muted" style="font-size:12px">(${a.userIds.length})</span></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); }; box.appendChild(row); }); }
-function saveSelectedAudience(){ const ids=ST._selected?Array.from(ST._selected):[]; if(!ids.length) return toast('خطأ','حدد مستخدمين أولًا.'); const name=prompt('اسم قائمة الجمهور:'); if(!name) return; ST.audiences.push({id:crypto.randomUUID(),name,userIds:ids}); savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges(); }
-
-/* ===== Content ===== */
-function renderImgs(){ const list=$('#imgList'); list.innerHTML=''; ST.images.forEach(img=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.innerHTML=`<div><b>${img.name}</b></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.images=ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); }; list.appendChild(row); }); }
-function renderCaps(){ const list=$('#capList'); list.innerHTML=''; ST.captions.forEach(c=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.innerHTML=`<div><b>${c.name}</b><div class="muted" style="font-size:12px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.text}</div></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.captions=ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); }; list.appendChild(row); }); }
-function saveImage(){ const name=$('#imgName').value.trim(), file=$('#imgFile').files[0]; if(!name||!file) return; const reader=new FileReader(); reader.onload=()=>{ ST.images.push({id:crypto.randomUUID(),name,url:reader.result}); savePersist(); renderImgs(); $('#imgName').value=''; $('#imgFile').value=''; }; reader.readAsDataURL(file); }
-function saveCaption(){ const name=$('#capName').value.trim(), text=$('#capText').value.trim(); if(!name||!text) return; ST.captions.push({id:crypto.randomUUID(),name,text}); savePersist(); renderCaps(); $('#capName').value=''; $('#capText').value=''; }
-
-/* ===== Campaigns (minimal sender stub) ===== */
-function fillCampaignDropdowns(){ const ddA=$('#ddAudience'); ddA.innerHTML=`<option value="">-- اختر جمهورًا --</option>`; ST.audiences.forEach(a=>ddA.add(new Option(`${a.name} (${a.userIds.length})`,a.id))); const ddI=$('#ddImage'); ddI.innerHTML=`<option value="">-- اختر صورة --</option>`; ST.images.forEach(img=>ddI.add(new Option(img.name,img.id))); ddI.onchange=()=>{ const img=ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value=img.url; }; const ddC=$('#ddCaption'); ddC.innerHTML=`<option value="">-- اختر نصًا --</option>`; ST.captions.forEach(c=>ddC.add(new Option(c.name,c.id))); ddC.onchange=()=>{ const c=ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value=c.text; }; renderSendList([]); }
-function renderSendList(ids){ const box=$('#sendList'); box.innerHTML=''; ids.forEach(id=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='8px'; row.style.border='1px solid var(--brd)'; row.style.borderRadius='12px'; row.innerHTML=`<div><b>${id}</b></div><span id="st-${id}" class="muted">—</span>`; box.appendChild(row); }); $('#targetCount').textContent=ids.length; }
-function bindCampaignControls(){ $('#btnStart').onclick=()=>toast('إرسال','ربط الـ Graph قيد التنفيذ حسب التوكن.'); $('#btnPause').onclick=()=>{}; $('#btnResume').onclick=()=>{}; $('#btnStop').onclick=()=>{}; }
-function updateSendProgress(){ $('#sendProg').textContent='0/0'; }
-
-/* ===== Reports ===== */
-function renderReports(){ const wrap=$('#reportsWrap'), empty=$('#noReports'); const reps=LS.get('lc_reports',[]); wrap.innerHTML=''; if(!reps.length){ empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); reps.slice().reverse().forEach(c=>{ const total=(c.successCount||0)+(c.failureCount||0); const card=document.createElement('div'); card.className='glass'; card.style.padding='10px'; card.innerHTML=`<div style="display:flex;justify-content:space-between"><b>${c.name||'Campaign'}</b><span class="muted" style="font-size:12px">${new Date(c.createdAt).toLocaleString()}</span></div><div class="muted" style="margin-top:6px;font-size:13px">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`; wrap.appendChild(card); }); }
-
-/* ===== Boot ===== */
-function initAfterLogin(){ setConnectedUI(!!ST.token && !!ST.pageId,null); window.dispatchEvent(new HashChangeEvent('hashchange')); }
-if(localStorage.getItem('lc_logged')==='1'){ $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); $('#app').style.display='grid'; }
-
-render();
+/*** راوتر بدائي (لو عندك قوالب زيادة احتفظ بها) ***/
+const views={dashboard(root){root.innerHTML=$('#tpl-dashboard').innerHTML;}};
+window.addEventListener('hashchange',()=>{const v=(location.hash||'#dashboard').slice(1); views[v]?.($('#viewRoot'));});
+window.dispatchEvent(new HashChangeEvent('hashchange'));
 </script>
 </body>
 </html>
