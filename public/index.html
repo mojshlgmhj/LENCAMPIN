@@ -1,669 +1,350 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Linux Campaign — Light Pro</title>
-  <style>
-    :root{
-      --bg:#f5f7fb;             /* خلفية فاتحة مريحة */
-      --card:rgba(255,255,255,.9);
-      --card-brd:#e6e8ef;
-      --txt:#0f172a;            /* Slate-900 */
-      --muted:#64748b;          /* Slate-500 */
-      --acc:#2563eb;            /* iOS blue */
-      --ok:#16a34a; --warn:#eab308; --err:#dc2626;
-      --blur:14px;
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;
-      background:
-        radial-gradient(800px 400px at 20% 0%, #ffffff, #eef2ff),
-        linear-gradient(180deg,#f9fafb,#f5f7fb);
-      color:var(--txt);
-      font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro", "Helvetica Neue", Arial;
-    }
-    .layout{display:grid;grid-template-columns:260px 1fr;height:100vh}
-    .glass{
-      background:var(--card);
-      border:1px solid var(--card-brd);
-      border-radius:var(--radius);
-      backdrop-filter:blur(var(--blur)) saturate(130%);
-      -webkit-backdrop-filter:blur(var(--blur)) saturate(130%);
-      box-shadow:0 8px 26px rgba(15,23,42,.06);
-    }
-    .card{background:var(--card);border:1px solid var(--card-brd);border-radius:var(--radius);padding:14px}
-    .nav{padding:16px}
-    .nav a{display:block;padding:10px 14px;border-radius:12px;color:var(--txt);text-decoration:none;opacity:.95;margin:6px 0}
-    .nav a.active{background:rgba(37,99,235,.08)}
-    header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
-    input,select,textarea{
-      background:#fff;color:var(--txt);border:1px solid var(--card-brd);
-      border-radius:12px;padding:10px;outline:0
-    }
-    .btn{border:1px solid var(--card-brd);background:#fff;color:var(--txt);border-radius:12px;padding:9px 12px;cursor:pointer}
-    .btn.primary{background:linear-gradient(180deg,#60a5fa,#2563eb);border-color:#3b82f6;color:#f8fafc}
-    .btn.warn{background:linear-gradient(180deg,#fde68a,#eab308);color:#1a1200}
-    .btn.danger{background:linear-gradient(180deg,#fecaca,#dc2626);color:#7f1d1d}
-    .btn.success{background:linear-gradient(180deg,#86efac,#16a34a);color:#052e16}
-    .badge{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:#eef2ff;color:#1e3a8a}
-    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-    .inner-scroll{max-height:60vh;overflow-y:auto}
-    .row{display:grid;gap:12px}
-    @media(min-width:900px){.row.cols-2{grid-template-columns:1fr 1fr}.row.cols-3{grid-template-columns:repeat(3,1fr)}}
-    .muted{color:var(--muted)}
-    /* جدول */
-    table{width:100%;border-collapse:collapse}
-    thead th{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid var(--card-brd);text-align:right;padding:10px}
-    tbody td{border-bottom:1px solid var(--card-brd);padding:8px}
-    /* مودال بسيط */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:60}
-    .modal .box{background:#fff;border:1px solid var(--card-brd);border-radius:14px;padding:18px;width:min(92vw,420px)}
-    /* Overlay تسجيل الدخول */
-    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
-    /* عناصر صغيرة */
-    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--card-brd)}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Linux Campaign — Light</title>
+<style>
+  :root{
+    --bg:#f5f7fb; --card:#ffffff; --brd:#e6e8ef; --txt:#0f172a; --muted:#64748b;
+    --acc:#2563eb; --ok:#16a34a; --warn:#eab308; --err:#dc2626; --radius:16px;
+  }
+  *{box-sizing:border-box} html,body{height:100%}
+  body{margin:0;background:linear-gradient(180deg,#fbfdff,#f5f7fb);color:var(--txt);font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
+  .layout{display:grid;grid-template-columns:260px 1fr;height:100vh}
+  .glass{background:var(--card);border:1px solid var(--brd);border-radius:var(--radius);box-shadow:0 8px 26px rgba(15,23,42,.06)}
+  header{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 14px}
+  .nav{padding:12px} .nav a{display:block;padding:10px 12px;margin:6px 0;border-radius:12px;text-decoration:none;color:var(--txt)}
+  .nav a.active{background:rgba(37,99,235,.08)}
+  input,textarea,select{width:100%;background:#fff;border:1px solid var(--brd);border-radius:12px;padding:10px}
+  .btn{border:1px solid var(--brd);background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer}
+  .btn.primary{background:linear-gradient(180deg,#60a5fa,#2563eb);color:#f8fafc;border-color:#3b82f6}
+  .btn.warn{background:linear-gradient(180deg,#fde68a,#eab308)}
+  .btn.danger{background:linear-gradient(180deg,#fecaca,#dc2626);color:#7f1d1d}
+  .badge{display:inline-block;background:#eef2ff;color:#1e3a8a;border-radius:999px;padding:4px 10px;font-size:12px}
+  .muted{color:var(--muted)} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .row{display:grid;gap:12px} @media(min-width:900px){.cols-2{grid-template-columns:1fr 1fr}.cols-3{grid-template-columns:repeat(3,1fr)}}
+  table{width:100%;border-collapse:collapse} thead th{position:sticky;top:0;background:#f8fafc;border-bottom:1px solid var(--brd);text-align:right;padding:10px}
+  tbody td{border-bottom:1px solid var(--brd);padding:8px}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
+  .hidden{display:none !important}
+</style>
 </head>
 <body>
 
-  <!-- Login -->
-  <div id="loginOverlay" class="overlay">
-    <div class="glass" style="width:min(92vw,420px);padding:20px">
-      <h1 style="text-align:center;font-weight:800;font-size:22px;margin:0">Linux <span style="color:var(--acc)">Campaign</span></h1>
-      <p class="muted" id="loginSubtitle" style="text-align:center;margin:.5rem 0 1rem">تسجيل دخول محلي (بدون Firebase)</p>
+<!-- LOGIN -->
+<div id="loginOverlay" class="overlay">
+  <div class="glass" style="width:min(92vw,420px);padding:18px">
+    <h1 style="margin:0;text-align:center;font-weight:800">Linux <span style="color:var(--acc)">Campaign</span></h1>
+    <p id="loginSubtitle" class="muted" style="text-align:center;margin:.4rem 0 1rem">تسجيل دخول محلي (بدون Firebase)</p>
+    <div class="row">
+      <div><label id="lblUser" style="font-size:12px">المستخدم</label><input id="adminUser" placeholder="admin"></div>
+      <div><label id="lblPass" style="font-size:12px">كلمة المرور</label><input id="adminPass" type="password" placeholder="••••••••"></div>
+      <button id="adminLoginBtn" type="button" class="btn primary" onclick="doLogin()">دخول</button>
+      <p id="loginError" class="muted hidden" style="color:#b91c1c">بيانات الدخول غير صحيحة.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="layout hidden">
+  <aside class="glass" style="margin:8px 8px 8px 8px;padding:10px;display:flex;flex-direction:column">
+    <div style="height:64px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--brd)">
+      <h2 style="margin:0;font-weight:800;font-size:18px">Linux <span style="color:var(--acc)">Campaign</span></h2>
+    </div>
+    <nav class="nav">
+      <a href="#dashboard" id="navDashboard">لوحة المعلومات</a>
+      <a href="#audience"  id="navAudience">الجمهور</a>
+      <a href="#content"   id="navContent">المحتوى</a>
+      <a href="#auddata"   id="navAuddata">بيانات الجمهور</a>
+      <a href="#campaigns" id="navCampaigns">إنشاء حملة</a>
+      <a href="#reports"   id="navReports">التقارير</a>
+    </nav>
+    <div style="margin-top:auto;border-top:1px solid var(--brd);padding:10px">
+      <a href="#settings" id="navSettings">الإعدادات</a>
+    </div>
+  </aside>
+
+  <section style="display:flex;flex-direction:column;min-width:0">
+    <header class="glass" style="margin:8px 8px 0 0">
+      <div style="display:flex;align-items:center;gap:8px">
+        <h3 id="pageTitle" style="margin:0;font-weight:700"></h3>
+        <span id="pageName" class="muted">غير متصل</span>
+        <span id="statusDot" style="width:10px;height:10px;border-radius:999px;background:#ef4444;display:inline-block"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="langLabel" class="badge">AR</span>
+        <button id="langToggle" class="btn" type="button">EN</button>
+      </div>
+    </header>
+
+    <div id="bannerDisconnected" class="glass" style="margin:8px 8px 0 0;padding:8px;color:#9a6700;background:#fffbe6;border:1px solid #ffe58f">
+      غير متصل. أدخل Page ID و Access Token من الإعدادات.
+    </div>
+
+    <main id="viewRoot" style="padding:10px;overflow:auto"></main>
+  </section>
+</div>
+
+<!-- TEMPLATES (مخففة) -->
+<template id="tpl-dashboard">
+  <div class="row cols-3">
+    <div class="glass" style="padding:12px"><div class="muted">إجمالي الجمهور</div><div id="statTotal" style="font-size:28px;font-weight:800">0</div></div>
+    <div class="glass" style="padding:12px"><div class="muted">الحملات المرسلة</div><div id="statSent" style="font-size:28px;font-weight:800">0</div></div>
+    <div class="glass" style="padding:12px"><div class="muted">معدل النجاح</div><div id="statRate" style="font-size:28px;font-weight:800">0%</div></div>
+  </div>
+</template>
+
+<template id="tpl-audience">
+  <div class="row">
+    <div class="glass" style="padding:10px;display:grid;grid-template-columns:1fr auto;gap:8px">
+      <b>مركز التحكم بالجمهور</b>
+      <div style="display:flex;gap:8px;justify-content:end;flex-wrap:wrap">
+        <button id="btnFetchStart"  class="btn primary" type="button">بدء السحب</button>
+        <button id="btnFetchPause"  class="btn warn" type="button">إيقاف مؤقت</button>
+        <button id="btnFetchResume" class="btn" type="button">استئناف</button>
+        <button id="btnFetchStop"   class="btn danger" type="button">إيقاف نهائي</button>
+        <button id="btnSaveWhole"   class="btn" type="button">حفظ الجمهور المسحوب</button>
+      </div>
+      <div style="grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;font-size:13px">
+        <span class="badge">المجموع: <b id="audCount">0</b></span>
+        <span class="badge">المحدد: <b id="selCount">0</b></span>
+        <span class="badge">الحالة: <b id="fetchState">متوقف</b></span>
+        <span class="badge">الصفحة الحالية: <b id="fetchPage">—</b></span>
+        <span class="badge">المضاف حديثًا: <b id="fetchAdded">0</b></span>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button id="btnSaveAud" class="btn warn" type="button">حفظ المحددين</button>
+      <button id="btnExportCSV" class="btn" type="button">تصدير CSV</button>
+      <button id="btnClearAll" class="btn danger" type="button">حذف كل الجمهور</button>
+      <div style="margin-inline-start:auto;display:flex;gap:8px;align-items:center">
+        <input id="filterTxt" placeholder="فلترة بالاسم أو ID" style="width:220px">
+        <button id="btnApplyFilter" class="btn" type="button">فلترة</button>
+        <button id="btnResetFilter" class="btn" type="button">إلغاء</button>
+      </div>
+    </div>
+
+    <div class="glass" style="padding:0">
+      <div style="max-height:60vh;overflow:auto">
+        <table>
+          <thead><tr><th style="width:26px"></th><th>المستخدم</th><th>ID</th></tr></thead>
+          <tbody id="audTable"></tbody>
+        </table>
+      </div>
+      <div id="audPager" style="padding:8px;display:flex;align-items:center;justify-content:center;gap:8px"></div>
+    </div>
+
+    <div class="glass" style="padding:10px">
+      <b>قوائم الجمهور المحفوظة</b>
+      <div id="audSaved" class="row"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-auddata">
+  <div class="row">
+    <div class="glass" style="padding:10px;display:flex;justify-content:space-between;align-items:center">
+      <b>قوائم “بيانات الجمهور”</b>
+      <button id="btnExportAllAud" class="btn" type="button">تصدير كل القوائم CSV</button>
+    </div>
+    <div id="audDataWrap" class="row cols-3"></div>
+    <p id="audDataEmpty" class="muted hidden" style="text-align:center">لا توجد قوائم محفوظة بعد.</p>
+  </div>
+</template>
+
+<template id="tpl-content">
+  <div class="row cols-2">
+    <div class="glass" style="padding:10px">
+      <b>مكتبة الصور</b>
+      <div class="row" style="margin-top:8px">
+        <input id="imgName" placeholder="اسم الصورة">
+        <input id="imgFile" type="file" accept="image/*">
+        <button id="btnSaveImg" class="btn primary" type="button">حفظ الصورة</button>
+      </div>
+      <div id="imgList" class="row" style="margin-top:8px"></div>
+    </div>
+    <div class="glass" style="padding:10px">
+      <b>مكتبة النصوص</b>
+      <div class="row" style="margin-top:8px">
+        <input id="capName" placeholder="اسم النص">
+        <textarea id="capText" placeholder="النص" style="min-height:110px"></textarea>
+        <button id="btnSaveCap" class="btn primary" type="button">حفظ النص</button>
+      </div>
+      <div id="capList" class="row" style="margin-top:8px"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-campaigns">
+  <div class="row cols-2">
+    <div class="glass" style="padding:10px">
       <div class="row">
-        <div class="row">
-          <label id="lblUser" style="font-size:12px">المستخدم</label>
-          <input id="adminUser" placeholder="admin">
+        <div><label style="font-size:12px">اختر جمهورك</label><select id="ddAudience"></select></div>
+        <div><label style="font-size:12px">الصورة</label><select id="ddImage"></select><input id="imgUrl" placeholder="أو أدخل رابط صورة" style="margin-top:8px"></div>
+        <div><label style="font-size:12px">النص</label><select id="ddCaption"></select><textarea id="msgText" style="margin-top:8px;min-height:110px" placeholder="أو اكتب رسالتك"></textarea></div>
+        <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+          <div><label style="font-size:12px">الفاصل (ثانية)</label><input id="delay" type="number" value="0" min="0" style="width:90px"></div>
+          <button id="btnStart"  class="btn primary" type="button">بدء الإرسال</button>
+          <button id="btnPause"  class="btn warn" type="button">إيقاف مؤقت</button>
+          <button id="btnResume" class="btn" type="button">استئناف</button>
+          <button id="btnStop"   class="btn danger" type="button">إيقاف نهائي</button>
+          <span style="margin-inline-start:auto">التقدم: <b id="sendProg">0/0</b></span>
         </div>
-        <div class="row">
-          <label id="lblPass" style="font-size:12px">كلمة المرور</label>
-          <input id="adminPass" type="password" placeholder="••••••••">
-        </div>
-        <button id="adminLoginBtn" class="btn primary">دخول</button>
-        <p id="loginError" class="muted" style="display:none;color:#b91c1c">بيانات الدخول غير صحيحة.</p>
+      </div>
+    </div>
+    <div class="glass" style="padding:10px">
+      <b>قائمة الإرسال (<span id="targetCount">0</span>)</b>
+      <div id="sendList" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-reports">
+  <div id="reportsWrap" class="row cols-3"></div>
+  <p id="noReports" class="muted hidden" style="text-align:center">لا توجد تقارير بعد.</p>
+</template>
+
+<template id="tpl-settings">
+  <div class="row cols-2">
+    <div class="glass" style="padding:10px">
+      <b>إعدادات الاتصال</b>
+      <div class="row" style="margin-top:8px">
+        <input id="pageId" placeholder="Page ID">
+        <input id="accessToken" placeholder="Page Access Token">
+        <button id="btnConnect" class="btn primary" type="button">حفظ والاتصال</button>
+      </div>
+    </div>
+    <div class="glass" style="padding:10px">
+      <b>جلسة المستخدم</b>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+        <span class="badge">admin</span>
+        <button id="btnLogout" class="btn" type="button">تسجيل الخروج</button>
+        <button id="btnClearCache" class="btn danger" type="button">تفريغ كل البيانات</button>
       </div>
     </div>
   </div>
+</template>
 
-  <!-- App -->
-  <div id="app" class="layout" style="display:none">
-    <aside class="glass" style="padding:12px;display:flex;flex-direction:column">
-      <div style="height:64px;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--card-brd);margin-bottom:6px">
-        <h2 style="font-weight:800;font-size:18px;margin:0">Linux <span style="color:var(--acc)">Campaign</span></h2>
-      </div>
-      <nav class="nav">
-        <a href="#dashboard" id="navDashboard">لوحة المعلومات</a>
-        <a href="#audience"  id="navAudience">الجمهور</a>
-        <a href="#content"   id="navContent">المحتوى</a>
-        <a href="#auddata"   id="navAuddata">بيانات الجمهور</a>
-        <a href="#campaigns" id="navCampaigns">إنشاء حملة</a>
-        <a href="#reports"   id="navReports">التقارير</a>
-      </nav>
-      <div style="margin-top:auto;border-top:1px solid var(--card-brd);padding:12px">
-        <a href="#settings" id="navSettings">الإعدادات</a>
-      </div>
-    </aside>
+<script>
+/* ===== Helpers/State ===== */
+const LS={get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)),del:k=>localStorage.removeItem(k)};
+const ST={connected:false,pageId:LS.get('lc_pageId',null),token:LS.get('lc_token',null),
+  users:LS.get('lc_users',[]),audiences:LS.get('lc_audiences',[]),images:LS.get('lc_images',[]),captions:LS.get('lc_captions',[]),
+  fetching:LS.get('lc_fetching',{running:false,paused:false,next:null,page:0}),fetchAdded:0,
+  sending:LS.get('lc_sending',{running:false,paused:false,idx:0,targets:[],job:null,delay:0})
+};
+const $=(s,p=document)=>p.querySelector(s); const $$=(s,p=document)=>Array.from(p.querySelectorAll(s));
+function savePersist(){LS.set('lc_users',ST.users);LS.set('lc_audiences',ST.audiences);LS.set('lc_images',ST.images);LS.set('lc_captions',ST.captions);LS.set('lc_fetching',ST.fetching);LS.set('lc_sending',ST.sending);}
+function toast(t,m){alert((t||'')+(m?'\n\n'+m:''));}
+function setConnectedUI(yes,name){$('#pageName').textContent=yes?(name||'متصل'):'غير متصل';$('#statusDot').style.background=yes?'#16a34a':'#ef4444';$('#bannerDisconnected').classList.toggle('hidden',yes);}
 
-    <section style="display:flex;flex-direction:column;min-width:0">
-      <header class="glass">
-        <div style="display:flex;align-items:center;gap:10px">
-          <h3 id="pageTitle" style="margin:0;font-weight:700"></h3>
-          <span id="pageName" class="muted">غير متصل</span>
-          <span id="statusDot" style="display:inline-block;width:10px;height:10px;border-radius:999px;background:#ef4444"></span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span id="langLabel" class="badge">AR</span>
-          <button id="langToggle" class="btn">EN</button>
-        </div>
-      </header>
+/* ===== i18n ===== */
+const I18N={ar:{dash:"لوحة المعلومات",aud:"الجمهور",cont:"المحتوى",auddata:"بيانات الجمهور",camp:"إنشاء حملة",rep:"التقارير",set:"الإعدادات",
+  start:"بدء السحب",pause:"إيقاف مؤقت",resume:"استئناف",stop:"إيقاف نهائي",saveAll:"حفظ الجمهور المسحوب",user:"المستخدم",pass:"كلمة المرور",login:"تسجيل دخول محلي (بدون Firebase)"},
+en:{dash:"Dashboard",aud:"Audience",cont:"Content",auddata:"Saved Audiences",camp:"Campaigns",rep:"Reports",set:"Settings",
+  start:"Start",pause:"Pause",resume:"Resume",stop:"Stop",saveAll:"Save current audience",user:"Username",pass:"Password",login:"Local login (no Firebase)"}};
+function setLang(lang){
+  localStorage.setItem('lc_lang',lang);
+  document.documentElement.lang=(lang==='en'?'en':'ar');
+  document.documentElement.dir=(lang==='en'?'ltr':'rtl');
+  const L=I18N[lang]||I18N.ar;
+  $('#navDashboard').textContent=L.dash;$('#navAudience').textContent=L.aud;$('#navContent').textContent=L.cont;$('#navAuddata').textContent=L.auddata;$('#navCampaigns').textContent=L.camp;$('#navReports').textContent=L.rep;$('#navSettings').textContent=L.set;
+  $('#lblUser')?.textContent=L.user; $('#lblPass')?.textContent=L.pass; $('#loginSubtitle')?.textContent=L.login;
+  $('#langLabel').textContent=(lang==='en'?'EN':'AR'); $('#langToggle').textContent=(lang==='en'?'AR':'EN');
+}
+$('#langToggle').addEventListener('click',()=>{ setLang(localStorage.getItem('lc_lang')==='en'?'ar':'en'); render(); });
+setLang(localStorage.getItem('lc_lang')||'ar');
 
-      <div id="bannerDisconnected" class="glass" style="display:none;margin:8px 12px 0;padding:8px;color:#9a6700;background:#fffbe6;border:1px solid #ffe58f">
-        غير متصل. أدخل Page ID و Access Token من الإعدادات.
-      </div>
+/* ===== LOGIN — Guaranteed ===== */
+function doLogin(){
+  const u=($('#adminUser')?.value||'').trim();
+  const p=($('#adminPass')?.value||'').trim();
+  const OK_USER='admin', OK_PASS='mO..012842';
+  if(u===OK_USER && p===OK_PASS){
+    localStorage.setItem('lc_logged','1');
+    $('#loginOverlay').classList.add('hidden');
+    $('#app').classList.remove('hidden'); $('#app').style.display='grid';
+    initAfterLogin();
+  }else{
+    $('#loginError')?.classList.remove('hidden');
+  }
+}
+$('#adminPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
-      <main id="viewRoot" style="padding:12px;overflow:auto"></main>
-    </section>
-  </div>
+/* ===== Router & Views ===== */
+const views={
+  dashboard(root){root.innerHTML=$('#tpl-dashboard').innerHTML;$('#statTotal').textContent=ST.users.length;const reps=LS.get('lc_reports',[]),sent=reps.reduce((a,c)=>a+(c.successCount||0),0),tot=reps.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);$('#statSent').textContent=sent;$('#statRate').textContent=tot?Math.round((sent/tot)*100)+'%':'0%';},
+  audience(root){root.innerHTML=$('#tpl-audience').innerHTML;bindAudienceUI();renderAudienceTable();renderSavedAudiences();updateFetchBadges();},
+  auddata(root){root.innerHTML=$('#tpl-auddata').innerHTML;renderAudDataPage();},
+  content(root){root.innerHTML=$('#tpl-content').innerHTML;$('#btnSaveImg').onclick=saveImage;$('#btnSaveCap').onclick=saveCaption;renderImgs();renderCaps();},
+  campaigns(root){root.innerHTML=$('#tpl-campaigns').innerHTML;fillCampaignDropdowns();bindCampaignControls();updateSendProgress();},
+  reports(root){root.innerHTML=$('#tpl-reports').innerHTML;renderReports();},
+  settings(root){root.innerHTML=$('#tpl-settings').innerHTML;$('#pageId').value=ST.pageId||'';$('#accessToken').value=ST.token||'';$('#btnConnect').onclick=()=>connect($('#pageId').value.trim(),$('#accessToken').value.trim());$('#btnLogout').onclick=()=>{localStorage.removeItem('lc_logged');location.reload();};$('#btnClearCache').onclick=()=>{if(confirm('تفريغ كل البيانات؟')){localStorage.clear();location.reload();}};}
+};
+function render(){const v=(location.hash||'#dashboard').slice(1);$$('.nav a').forEach(a=>a.classList.remove('active'));$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');$('#pageTitle').textContent=$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent||'';views[v]?.($('#viewRoot')); }
+window.addEventListener('hashchange',render);
 
-  <!-- Templates -->
-  <template id="tpl-dashboard">
-    <div class="row cols-3">
-      <div class="card">
-        <div class="muted">إجمالي الجمهور</div>
-        <div id="statTotal" style="font-size:28px;font-weight:800;margin-top:6px">0</div>
-      </div>
-      <div class="card">
-        <div class="muted">الحملات المرسلة</div>
-        <div id="statSent" style="font-size:28px;font-weight:800;margin-top:6px">0</div>
-      </div>
-      <div class="card">
-        <div class="muted">معدل النجاح</div>
-        <div id="statRate" style="font-size:28px;font-weight:800;margin-top:6px">0%</div>
-      </div>
-    </div>
-  </template>
+/* ===== Connect (Graph) ===== */
+async function connect(pageId,token){
+  if(!pageId||!token) return toast('خطأ','أدخل Page ID و Access Token');
+  try{
+    const res=await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name&access_token=${encodeURIComponent(token)}`);
+    const data=await res.json(); if(!res.ok||data.error) throw new Error(data.error?.message||('HTTP '+res.status));
+    ST.pageId=pageId; ST.token=token; ST.connected=true; LS.set('lc_pageId',pageId); LS.set('lc_token',token);
+    setConnectedUI(true,data.name); toast('تم الاتصال',`متصل الآن بصفحة ${data.name}`);
+  }catch(e){ setConnectedUI(false); toast('فشل الاتصال',e.message); }
+}
 
-  <template id="tpl-audience">
-    <div class="row">
-      <div class="glass" style="padding:12px">
-        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center">
-          <div style="font-weight:700">مركز التحكم بالجمهور</div>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end">
-            <button id="btnFetchStart"  class="btn primary">بدء السحب</button>
-            <button id="btnFetchPause"  class="btn warn">إيقاف مؤقت</button>
-            <button id="btnFetchResume" class="btn success">استئناف</button>
-            <button id="btnFetchStop"   class="btn danger">إيقاف نهائي</button>
-            <button id="btnSaveWhole"   class="btn" style="border-color:#c4b5fd;background:linear-gradient(180deg,#e9d5ff,#c4b5fd)">حفظ الجمهور المسحوب</button>
-          </div>
-          <div class="row" style="grid-column:1/-1;grid-template-columns:repeat(5,max-content);gap:8px;font-size:13px">
-            <span class="chip">المجموع: <b id="audCount">0</b></span>
-            <span class="chip">المحدد: <b id="selCount">0</b></span>
-            <span class="chip">الحالة: <b id="fetchState">متوقف</b></span>
-            <span class="chip">الصفحة الحالية: <b id="fetchPage">—</b></span>
-            <span class="chip">المضاف حديثًا: <b id="fetchAdded">0</b></span>
-          </div>
-        </div>
-      </div>
+/* ===== Audience (minimal stable) ===== */
+function bindAudienceUI(){
+  $('#btnSaveAud').onclick=saveSelectedAudience; $('#btnExportCSV').onclick=exportCSV; $('#btnClearAll').onclick=()=>{ if(confirm('حذف كل الجمهور؟')){ ST.users=[]; savePersist(); renderAudienceTable(); } };
+  $('#btnApplyFilter').onclick=()=>renderAudienceTable($('#filterTxt').value.trim()); $('#btnResetFilter').onclick=()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
+  $('#btnSaveWhole').onclick=saveWholeAudience;
+  // أزرار السحب يمكن ربطها لاحقًا بواجهة Graph حسب إذنك
+  $('#btnFetchStart').onclick=()=>toast('سحب','اربط التوكن أولاً من الإعدادات ثم نفذ السحب.');
+  $('#btnFetchPause').onclick=()=>{}; $('#btnFetchResume').onclick=()=>{}; $('#btnFetchStop').onclick=()=>{};
+}
+let AUD_PAGE=1, AUD_SIZE=100;
+function renderAudienceTable(filter=''){
+  const body=$('#audTable'); body.innerHTML='';
+  let rows=ST.users; if(filter){ rows=rows.filter(u=>(u.name||'').includes(filter)||(u.id||'').includes(filter)); }
+  const totalPages=Math.max(1,Math.ceil(rows.length/AUD_SIZE)); if(AUD_PAGE>totalPages) AUD_PAGE=totalPages;
+  const slice=rows.slice((AUD_PAGE-1)*AUD_SIZE,AUD_PAGE*AUD_SIZE);
+  slice.forEach(u=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td><input type="checkbox" data-id="${u.id}"></td><td><b>${u.name||'User'}</b></td><td class="mono">${u.id}</td>`; body.appendChild(tr); });
+  body.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=(e)=>{ const id=e.target.dataset.id; if(!ST._selected) ST._selected=new Set(); e.target.checked?ST._selected.add(id):ST._selected.delete(id); ST._selectedCount=ST._selected.size; updateFetchBadges(); });
+  $('#audPager').innerHTML=`<button class="btn" ${AUD_PAGE<=1?'disabled':''} id="pgPrev">‹</button><span class="badge">${AUD_PAGE} / ${totalPages}</span><button class="btn" ${AUD_PAGE>=totalPages?'disabled':''} id="pgNext">›</button>`;
+  $('#pgPrev')?.addEventListener('click',()=>{ if(AUD_PAGE>1){ AUD_PAGE--; renderAudienceTable($('#filterTxt').value.trim()); }});
+  $('#pgNext')?.addEventListener('click',()=>{ if(AUD_PAGE<totalPages){ AUD_PAGE++; renderAudienceTable($('#filterTxt').value.trim()); }});
+  updateFetchBadges();
+}
+function updateFetchBadges(){ $('#audCount').textContent=ST.users.length; $('#selCount').textContent=ST._selectedCount||0; $('#fetchState').textContent='متوقف'; $('#fetchPage').textContent='—'; $('#fetchAdded').textContent=ST.fetchAdded||0; }
+function exportCSV(){ const rows=[['id','name']].concat(ST.users.map(u=>[u.id||'',u.name||''])); const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n'); const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url); }
+function saveWholeAudience(){ if(!ST.users.length) return toast('لا يوجد جمهور','أضف/اسحب الجمهور أولًا.'); const name=prompt('اسم قائمة الجمهور:'); if(!name) return; ST.audiences.push({id:crypto.randomUUID(),name:name.trim(),userIds:ST.users.map(u=>u.id)}); savePersist(); renderSavedAudiences(); }
+function renderSavedAudiences(){ const box=$('#audSaved'); if(!box) return; box.innerHTML=''; ST.audiences.forEach(a=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.alignItems='center'; row.innerHTML=`<div><b>${a.name}</b> <span class="muted" style="font-size:12px">(${a.userIds.length})</span></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); }; box.appendChild(row); }); }
+function saveSelectedAudience(){ const ids=ST._selected?Array.from(ST._selected):[]; if(!ids.length) return toast('خطأ','حدد مستخدمين أولًا.'); const name=prompt('اسم قائمة الجمهور:'); if(!name) return; ST.audiences.push({id:crypto.randomUUID(),name,userIds:ids}); savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges(); }
 
-      <div class="glass" style="padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-        <button id="btnSaveAud" class="btn warn">حفظ المحددين</button>
-        <button id="btnExportCSV" class="btn">تصدير CSV</button>
-        <button id="btnClearAll" class="btn danger">حذف كل الجمهور</button>
-        <div style="margin-inline-start:auto;display:flex;gap:8px;align-items:center">
-          <input id="filterTxt" placeholder="فلترة بالاسم أو ID" style="width:220px">
-          <button id="btnApplyFilter" class="btn">فلترة</button>
-          <button id="btnResetFilter" class="btn">إلغاء</button>
-        </div>
-      </div>
+/* ===== Content ===== */
+function renderImgs(){ const list=$('#imgList'); list.innerHTML=''; ST.images.forEach(img=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.innerHTML=`<div><b>${img.name}</b></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.images=ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); }; list.appendChild(row); }); }
+function renderCaps(){ const list=$('#capList'); list.innerHTML=''; ST.captions.forEach(c=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.innerHTML=`<div><b>${c.name}</b><div class="muted" style="font-size:12px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.text}</div></div><button class="btn danger" type="button">حذف</button>`; row.querySelector('button').onclick=()=>{ ST.captions=ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); }; list.appendChild(row); }); }
+function saveImage(){ const name=$('#imgName').value.trim(), file=$('#imgFile').files[0]; if(!name||!file) return; const reader=new FileReader(); reader.onload=()=>{ ST.images.push({id:crypto.randomUUID(),name,url:reader.result}); savePersist(); renderImgs(); $('#imgName').value=''; $('#imgFile').value=''; }; reader.readAsDataURL(file); }
+function saveCaption(){ const name=$('#capName').value.trim(), text=$('#capText').value.trim(); if(!name||!text) return; ST.captions.push({id:crypto.randomUUID(),name,text}); savePersist(); renderCaps(); $('#capName').value=''; $('#capText').value=''; }
 
-      <div class="glass" style="padding:0">
-        <div class="inner-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th class="w-10"> </th>
-                <th>المستخدم</th>
-                <th>ID</th>
-              </tr>
-            </thead>
-            <tbody id="audTable"></tbody>
-          </table>
-        </div>
-        <div id="audPager" style="padding:8px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px"></div>
-      </div>
+/* ===== Campaigns (minimal sender stub) ===== */
+function fillCampaignDropdowns(){ const ddA=$('#ddAudience'); ddA.innerHTML=`<option value="">-- اختر جمهورًا --</option>`; ST.audiences.forEach(a=>ddA.add(new Option(`${a.name} (${a.userIds.length})`,a.id))); const ddI=$('#ddImage'); ddI.innerHTML=`<option value="">-- اختر صورة --</option>`; ST.images.forEach(img=>ddI.add(new Option(img.name,img.id))); ddI.onchange=()=>{ const img=ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value=img.url; }; const ddC=$('#ddCaption'); ddC.innerHTML=`<option value="">-- اختر نصًا --</option>`; ST.captions.forEach(c=>ddC.add(new Option(c.name,c.id))); ddC.onchange=()=>{ const c=ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value=c.text; }; renderSendList([]); }
+function renderSendList(ids){ const box=$('#sendList'); box.innerHTML=''; ids.forEach(id=>{ const row=document.createElement('div'); row.style.display='flex'; row.style.justifyContent='space-between'; row.style.padding='8px'; row.style.border='1px solid var(--brd)'; row.style.borderRadius='12px'; row.innerHTML=`<div><b>${id}</b></div><span id="st-${id}" class="muted">—</span>`; box.appendChild(row); }); $('#targetCount').textContent=ids.length; }
+function bindCampaignControls(){ $('#btnStart').onclick=()=>toast('إرسال','ربط الـ Graph قيد التنفيذ حسب التوكن.'); $('#btnPause').onclick=()=>{}; $('#btnResume').onclick=()=>{}; $('#btnStop').onclick=()=>{}; }
+function updateSendProgress(){ $('#sendProg').textContent='0/0'; }
 
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700;margin-bottom:8px">قوائم الجمهور المحفوظة</div>
-        <div id="audSaved" class="row"></div>
-      </div>
-    </div>
-  </template>
+/* ===== Reports ===== */
+function renderReports(){ const wrap=$('#reportsWrap'), empty=$('#noReports'); const reps=LS.get('lc_reports',[]); wrap.innerHTML=''; if(!reps.length){ empty.classList.remove('hidden'); return; } empty.classList.add('hidden'); reps.slice().reverse().forEach(c=>{ const total=(c.successCount||0)+(c.failureCount||0); const card=document.createElement('div'); card.className='glass'; card.style.padding='10px'; card.innerHTML=`<div style="display:flex;justify-content:space-between"><b>${c.name||'Campaign'}</b><span class="muted" style="font-size:12px">${new Date(c.createdAt).toLocaleString()}</span></div><div class="muted" style="margin-top:6px;font-size:13px">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`; wrap.appendChild(card); }); }
 
-  <template id="tpl-auddata">
-    <div class="row">
-      <div class="glass" style="padding:12px;display:flex;align-items:center;justify-content:space-between">
-        <div style="font-weight:700">قوائم “بيانات الجمهور”</div>
-        <button id="btnExportAllAud" class="btn">تصدير كل القوائم CSV</button>
-      </div>
-      <div id="audDataWrap" class="row cols-3"></div>
-      <p id="audDataEmpty" class="muted" style="text-align:center;display:none">لا توجد قوائم محفوظة بعد.</p>
-    </div>
-  </template>
+/* ===== Boot ===== */
+function initAfterLogin(){ setConnectedUI(!!ST.token && !!ST.pageId,null); window.dispatchEvent(new HashChangeEvent('hashchange')); }
+if(localStorage.getItem('lc_logged')==='1'){ $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); $('#app').style.display='grid'; }
 
-  <template id="tpl-content">
-    <div class="row cols-2">
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700;margin-bottom:8px">مكتبة الصور</div>
-        <div class="row">
-          <input id="imgName" placeholder="اسم الصورة" />
-          <input id="imgFile" type="file" accept="image/*" />
-          <button id="btnSaveImg" class="btn primary">حفظ الصورة</button>
-        </div>
-        <div id="imgList" class="row" style="margin-top:10px"></div>
-      </div>
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700;margin-bottom:8px">مكتبة النصوص</div>
-        <div class="row">
-          <input id="capName" placeholder="اسم النص" />
-          <textarea id="capText" class="h-28" placeholder="النص" style="min-height:110px"></textarea>
-          <button id="btnSaveCap" class="btn primary">حفظ النص</button>
-        </div>
-        <div id="capList" class="row" style="margin-top:10px"></div>
-      </div>
-    </div>
-  </template>
-
-  <template id="tpl-campaigns">
-    <div class="row cols-2">
-      <div class="glass" style="padding:12px">
-        <div class="row">
-          <div>
-            <label style="font-size:12px">اختر جمهورك</label>
-            <select id="ddAudience" style="width:100%"></select>
-          </div>
-          <div>
-            <label style="font-size:12px">الصورة</label>
-            <select id="ddImage" style="width:100%"></select>
-            <input id="imgUrl" placeholder="أو أدخل رابط صورة" style="margin-top:8px;width:100%"/>
-          </div>
-          <div>
-            <label style="font-size:12px">النص</label>
-            <select id="ddCaption" style="width:100%"></select>
-            <textarea id="msgText" style="margin-top:8px;width:100%;min-height:110px" placeholder="أو اكتب رسالتك"></textarea>
-          </div>
-          <div style="display:flex;flex-wrap:wrap;align-items:end;gap:8px">
-            <div>
-              <label style="font-size:12px">الفاصل (ثانية)</label>
-              <input id="delay" type="number" value="0" min="0" style="width:90px" />
-            </div>
-            <button id="btnStart"  class="btn primary">بدء الإرسال</button>
-            <button id="btnPause"  class="btn warn">إيقاف مؤقت</button>
-            <button id="btnResume" class="btn success">استئناف</button>
-            <button id="btnStop"   class="btn danger">إيقاف نهائي</button>
-            <span style="margin-inline-start:auto;font-size:13px">التقدم: <b id="sendProg">0/0</b></span>
-          </div>
-        </div>
-      </div>
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700">قائمة الإرسال (<span id="targetCount">0</span>)</div>
-        <div id="sendList" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow:auto"></div>
-      </div>
-    </div>
-  </template>
-
-  <template id="tpl-reports">
-    <div id="reportsWrap" class="row cols-3"></div>
-    <p id="noReports" class="muted" style="text-align:center;display:none;margin-top:10px">لا توجد تقارير بعد.</p>
-  </template>
-
-  <template id="tpl-settings">
-    <div class="row cols-2">
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700;margin-bottom:8px">إعدادات الاتصال</div>
-        <div class="row">
-          <input id="pageId" placeholder="Page ID" />
-          <input id="accessToken" placeholder="Page Access Token" />
-          <button id="btnConnect" class="btn primary">حفظ والاتصال</button>
-        </div>
-      </div>
-      <div class="glass" style="padding:12px">
-        <div style="font-weight:700;margin-bottom:8px">جلسة المستخدم</div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="chip">admin</span>
-          <button id="btnLogout" class="btn">تسجيل الخروج</button>
-          <button id="btnClearCache" class="btn danger">تفريغ كل البيانات</button>
-        </div>
-      </div>
-    </div>
-  </template>
-
-  <!-- Modal -->
-  <div id="modal" class="modal">
-    <div class="box">
-      <h4 id="mTitle" style="margin:0 0 6px;font-weight:700"></h4>
-      <p id="mMsg" style="margin:0;white-space:pre-wrap"></p>
-      <div style="text-align:left;margin-top:12px"><button id="mOk" class="btn primary">حسنًا</button></div>
-    </div>
-  </div>
-
-  <script>
-    /* ========= تخزين محلي ========= */
-    const LS={ get:(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)), del:(k)=>localStorage.removeItem(k)};
-    const ST={
-      connected:false,
-      pageId:LS.get('lc_pageId',null), token:LS.get('lc_token',null),
-      users:LS.get('lc_users',[]),               // [{id,name,picture}]
-      audiences:LS.get('lc_audiences',[]),       // [{id,name,userIds:[]}]
-      images:LS.get('lc_images',[]), captions:LS.get('lc_captions',[]),
-      fetching:LS.get('lc_fetching',{running:false,paused:false,next:null,page:0}), fetchAdded:0,
-      sending:LS.get('lc_sending',{running:false,paused:false,idx:0,targets:[],job:null,delay:0})
-    };
-    const $=(s,p=document)=>p.querySelector(s); const $$=(s,p=document)=>Array.from(p.querySelectorAll(s));
-    function savePersist(){ LS.set('lc_users',ST.users); LS.set('lc_audiences',ST.audiences); LS.set('lc_images',ST.images); LS.set('lc_captions',ST.captions); LS.set('lc_fetching',ST.fetching); LS.set('lc_sending',ST.sending); }
-    function toast(t,m){ $('#mTitle').textContent=t; $('#mMsg').textContent=m||''; $('#modal').style.display='flex'; $('#mOk').onclick=()=>$('#modal').style.display='none'; }
-    function setConnectedUI(yes,name){ $('#pageName').textContent=yes?(name||'متصل'):'غير متصل'; $('#statusDot').style.background=yes?'#16a34a':'#ef4444'; $('#bannerDisconnected').style.display=yes?'none':'block'; }
-
-    /* ========= i18n ========= */
-    const I18N={
-      ar:{dash:"لوحة المعلومات",aud:"الجمهور",cont:"المحتوى",auddata:"بيانات الجمهور",camp:"إنشاء حملة",rep:"التقارير",set:"الإعدادات",
-          saveAll:"حفظ الجمهور المسحوب",noAud:"لا يوجد جمهور",askList:"اسم قائمة الجمهور:",savedAll:"تم حفظ كل الجمهور ضمن “بيانات الجمهور”.",
-          start:"بدء السحب",pause:"إيقاف مؤقت",resume:"استئناف",stop:"إيقاف نهائي",state:"الحالة",page:"الصفحة الحالية",added:"المضاف حديثًا",
-          loginHint:"تسجيل دخول محلي (بدون Firebase)",user:"المستخدم",pass:"كلمة المرور",ok:"حسنًا"},
-      en:{dash:"Dashboard",aud:"Audience",cont:"Content",auddata:"Saved Audiences",camp:"Campaigns",rep:"Reports",set:"Settings",
-          saveAll:"Save current audience",noAud:"No audience yet",askList:"List name:",savedAll:"Saved to “Saved Audiences”.",
-          start:"Start",pause:"Pause",resume:"Resume",stop:"Stop",state:"State",page:"Page",added:"Added",
-          loginHint:"Local login (no Firebase)",user:"Username",pass:"Password",ok:"OK"}
-    };
-    function setLang(lang){
-      const L=I18N[lang]||I18N.ar;
-      localStorage.setItem('lc_lang',lang);
-      document.documentElement.lang=(lang==='en'?'en':'ar');
-      document.documentElement.dir=(lang==='en'?'ltr':'rtl');
-      $('#navDashboard').textContent=L.dash; $('#navAudience').textContent=L.aud; $('#navContent').textContent=L.cont;
-      $('#navAuddata').textContent=L.auddata; $('#navCampaigns').textContent=L.camp; $('#navReports').textContent=L.rep; $('#navSettings').textContent=L.set;
-      $('#lblUser')?.textContent=L.user; $('#lblPass')?.textContent=L.pass; $('#loginSubtitle')?.textContent=L.loginHint; $('#mOk')?.textContent=L.ok;
-      $('#langLabel').textContent=(lang==='en'?'EN':'AR'); $('#langToggle').textContent=(lang==='en'?'AR':'EN');
-      if(location.hash==='#audience'){ const L2=L; $('#btnFetchStart').textContent=L2.start; $('#btnFetchPause').textContent=L2.pause; $('#btnFetchResume').textContent=L2.resume; $('#btnFetchStop').textContent=L2.stop; $('#btnSaveWhole').textContent=L2.saveAll; }
-    }
-    $('#langToggle')?.addEventListener('click',()=>{ const lang=localStorage.getItem('lc_lang')==='en'?'ar':'en'; setLang(lang); render(); });
-    setLang(localStorage.getItem('lc_lang')||'ar');
-
-    /* ========= Login ثابت ========= */
-    function doLogin(){
-      const userEl=$('#adminUser'), passEl=$('#adminPass');
-      if(!userEl || !passEl){ alert('حقول الدخول غير موجودة'); return; }
-      const u=(userEl.value||'').trim(), p=(passEl.value||'').trim();
-      const OK_USER='admin', OK_PASS='mO..012842';
-      if(u===OK_USER && p===OK_PASS){
-        localStorage.setItem('lc_logged','1');
-        $('#loginOverlay').style.display='none';
-        $('#app').style.display='grid';
-        initAfterLogin();
-      }else{
-        $('#loginError').style.display='block';
-      }
-    }
-    $('#adminLoginBtn')?.addEventListener('click',doLogin);
-    $('#adminPass')?.addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
-    if(localStorage.getItem('lc_logged')==='1'){ $('#loginOverlay').style.display='none'; $('#app').style.display='grid'; }
-
-    /* ========= Router ========= */
-    const views={
-      dashboard(root){
-        root.innerHTML=$('#tpl-dashboard').innerHTML;
-        $('#statTotal').textContent=ST.users.length;
-        const reps=LS.get('lc_reports',[]), sent=reps.reduce((a,c)=>a+(c.successCount||0),0), tot=reps.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
-        $('#statSent').textContent=sent; $('#statRate').textContent=tot?Math.round((sent/tot)*100)+'%':'0%';
-      },
-      audience(root){
-        root.innerHTML=$('#tpl-audience').innerHTML;
-        bindAudienceUI(); renderAudienceTable(); renderSavedAudiences(); updateFetchBadges();
-        const lang=localStorage.getItem('lc_lang')||'ar', L=I18N[lang];
-        $('#btnFetchStart').textContent=L.start; $('#btnFetchPause').textContent=L.pause; $('#btnFetchResume').textContent=L.resume; $('#btnFetchStop').textContent=L.stop; $('#btnSaveWhole').textContent=L.saveAll;
-      },
-      auddata(root){ root.innerHTML=$('#tpl-auddata').innerHTML; renderAudDataPage(); },
-      content(root){ root.innerHTML=$('#tpl-content').innerHTML; $('#btnSaveImg').onclick=saveImage; $('#btnSaveCap').onclick=saveCaption; renderImgs(); renderCaps(); },
-      campaigns(root){ root.innerHTML=$('#tpl-campaigns').innerHTML; fillCampaignDropdowns(); bindCampaignControls(); updateSendProgress(); },
-      reports(root){ root.innerHTML=$('#tpl-reports').innerHTML; renderReports(); },
-      settings(root){
-        root.innerHTML=$('#tpl-settings').innerHTML;
-        $('#pageId').value=ST.pageId||''; $('#accessToken').value=ST.token||'';
-        $('#btnConnect').onclick=()=>connect($('#pageId').value.trim(), $('#accessToken').value.trim());
-        $('#btnLogout').onclick =()=>{ localStorage.removeItem('lc_logged'); location.reload(); };
-        $('#btnClearCache').onclick=()=>{ if(confirm('تفريغ كل البيانات المحلية؟')){ localStorage.clear(); location.reload(); } };
-      }
-    };
-    function render(){
-      const v=(location.hash||'#dashboard').slice(1);
-      $$('.nav a').forEach(a=>a.classList.remove('active')); $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');
-      $('#pageTitle').textContent=$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent||'';
-      views[v]?.($('#viewRoot'));
-    }
-    window.addEventListener('hashchange',render);
-
-    /* ========= اتصال جراف ========= */
-    async function connect(pageId,token){
-      if(!pageId||!token) return toast('خطأ','أدخل Page ID و Access Token');
-      try{
-        const res=await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name,picture.type(small)&access_token=${encodeURIComponent(token)}`);
-        const data=await res.json();
-        if(!res.ok||data.error) throw new Error(data.error?.message||('HTTP '+res.status));
-        ST.pageId=pageId; ST.token=token; ST.connected=true; LS.set('lc_pageId',pageId); LS.set('lc_token',token);
-        setConnectedUI(true,data.name); toast('تم الاتصال',`متصل الآن بصفحة ${data.name}`);
-      }catch(e){ setConnectedUI(false); toast('فشل الاتصال', e.message); }
-    }
-
-    /* ========= جمهور ========= */
-    function bindAudienceUI(){
-      $('#btnFetchStart').onclick=fetchStart; $('#btnFetchPause').onclick=fetchPause; $('#btnFetchResume').onclick=fetchResume; $('#btnFetchStop').onclick=fetchStop;
-      $('#btnSaveAud').onclick=saveSelectedAudience; $('#btnExportCSV').onclick=exportCSV; $('#btnClearAll').onclick=()=>{ if(confirm('حذف كل الجمهور؟')){ ST.users=[]; savePersist(); renderAudienceTable(); } };
-      $('#btnApplyFilter').onclick=applyFilter; $('#btnResetFilter').onclick=()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
-      $('#btnSaveWhole').onclick=saveWholeAudience;
-    }
-    function updateFetchBadges(){
-      $('#audCount').textContent=ST.users.length;
-      $('#selCount').textContent=ST._selectedCount||0;
-      $('#fetchState').textContent=ST.fetching.running?(ST.fetching.paused?'متوقف مؤقتًا':'يعمل'):'متوقف';
-      $('#fetchPage').textContent=ST.fetching.page||'—';
-      $('#fetchAdded').textContent=ST.fetchAdded||0;
-    }
-    let AUD_PAGE=1, AUD_SIZE=100;
-    function renderAudienceTable(filter=''){
-      const body=$('#audTable'); body.innerHTML='';
-      let rows=ST.users; if(filter){ rows=rows.filter(u=>(u.name||'').includes(filter)||(u.id||'').includes(filter)); }
-      const totalPages=Math.max(1,Math.ceil(rows.length/AUD_SIZE)); if(AUD_PAGE>totalPages) AUD_PAGE=totalPages;
-      const slice=rows.slice((AUD_PAGE-1)*AUD_SIZE, AUD_PAGE*AUD_SIZE);
-      slice.forEach(u=>{
-        const tr=document.createElement('tr');
-        tr.innerHTML=`<td><input type="checkbox" data-id="${u.id}"></td>
-                      <td><div style="display:flex;align-items:center;gap:8px">
-                        <img src="${u.picture||'https://placehold.co/40'}" style="width:32px;height:32px;border-radius:8px;object-fit:cover">
-                        <b>${u.name||'User'}</b></div></td>
-                      <td class="mono">${u.id}</td>`;
-        body.appendChild(tr);
-      });
-      body.querySelectorAll('input[type=checkbox]').forEach(cb=>cb.onchange=(e)=>{
-        const id=e.target.dataset.id; if(!ST._selected) ST._selected=new Set(); e.target.checked?ST._selected.add(id):ST._selected.delete(id); ST._selectedCount=ST._selected.size; updateFetchBadges();
-      });
-      const pager=$('#audPager');
-      pager.innerHTML=`<button class="btn" ${AUD_PAGE<=1?'disabled':''} id="pgPrev">‹</button>
-                       <span class="badge">${AUD_PAGE} / ${totalPages}</span>
-                       <button class="btn" ${AUD_PAGE>=totalPages?'disabled':''} id="pgNext">›</button>`;
-      $('#pgPrev')?.addEventListener('click',()=>{ if(AUD_PAGE>1){ AUD_PAGE--; renderAudienceTable($('#filterTxt').value.trim()); }});
-      $('#pgNext')?.addEventListener('click',()=>{ if(AUD_PAGE<totalPages){ AUD_PAGE++; renderAudienceTable($('#filterTxt').value.trim()); }});
-      $('#audCount').textContent=ST.users.length; $('#selCount').textContent=ST._selectedCount||0;
-    }
-    function applyFilter(){ renderAudienceTable($('#filterTxt').value.trim()); }
-    function exportCSV(){
-      const rows=[['id','name','picture']].concat(ST.users.map(u=>[u.id||'',u.name||'',u.picture||'']));
-      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
-      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url);
-    }
-    function saveWholeAudience(){
-      if(!ST.users.length) return toast('لا يوجد جمهور','اسحب الجمهور أولًا.');
-      const L=I18N[localStorage.getItem('lc_lang')||'ar'];
-      const name=prompt(L.askList); if(!name) return;
-      const ids=ST.users.map(u=>u.id).filter(Boolean);
-      ST.audiences.push({id:crypto.randomUUID(), name:name.trim(), userIds:ids});
-      savePersist(); toast('تم', L.savedAll); renderSavedAudiences?.();
-    }
-
-    async function fetchLoop(){
-      let backoff=800;
-      while(ST.fetching.running && !ST.fetching.paused && ST.fetching.next){
-        try{
-          const res=await fetch(ST.fetching.next); const data=await res.json();
-          if(data.error){
-            const code=String(data.error.code||'');
-            if(code.includes('613')||code.includes('4')){ await new Promise(r=>setTimeout(r,backoff)); backoff=Math.min(backoff*1.8,60000); continue; }
-            throw new Error(data.error.message);
-          }
-          backoff=800;
-          const seen=new Set(ST.users.map(u=>u.id));
-          (data.data||[]).forEach(conv=>{
-            const u=(conv.participants?.data||[]).find(p=>p.id!==ST.pageId);
-            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id,name:u.name,picture:u.picture?.data?.url}); ST.fetchAdded++; }
-          });
-          ST.fetching.next=data.paging?.next||null; ST.fetching.page=(ST.fetching.page||0)+1; savePersist();
-          renderAudienceTable($('#filterTxt')?.value||''); updateFetchBadges();
-          await new Promise(r=>setTimeout(r,450));
-          if(!ST.fetching.next){ ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('انتهى السحب','لا مزيد من الصفحات.'); }
-        }catch(e){ ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('خطأ في السحب', e.message||String(e)); }
-      }
-    }
-    function fetchStart(){ if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
-      ST.fetching.running=true; ST.fetching.paused=false;
-      ST.fetching.next=`https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
-      ST.fetching.page=0; ST.fetchAdded=0; savePersist(); updateFetchBadges(); fetchLoop();
-    }
-    function fetchPause(){ if(ST.fetching.running){ ST.fetching.paused=true; savePersist(); updateFetchBadges(); } }
-    function fetchResume(){ if(ST.fetching.next){ ST.fetching.paused=false; ST.fetching.running=true; savePersist(); updateFetchBadges(); fetchLoop(); } }
-    function fetchStop(){ ST.fetching.running=false; ST.fetching.paused=false; savePersist(); updateFetchBadges(); }
-
-    function renderSavedAudiences(){
-      const box=$('#audSaved'); if(!box) return; box.innerHTML='';
-      ST.audiences.forEach(a=>{
-        const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between'; row.style.padding='6px 0';
-        row.innerHTML=`<div><b>${a.name}</b> <span class="muted" style="font-size:12px">(${a.userIds.length})</span></div>
-                       <button class="btn danger" data-id="${a.id}">حذف</button>`;
-        row.querySelector('button').onclick=()=>{ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); };
-        box.appendChild(row);
-      });
-    }
-    function saveSelectedAudience(){
-      const ids=ST._selected?Array.from(ST._selected):[]; if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
-      const L=I18N[localStorage.getItem('lc_lang')||'ar']; const name=prompt(L.askList); if(!name) return;
-      ST.audiences.push({id:crypto.randomUUID(), name, userIds:ids}); savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges(); toast('تم', L.savedAll);
-    }
-
-    /* ========= المحتوى ========= */
-    function renderImgs(){ const list=$('#imgList'); list.innerHTML=''; ST.images.forEach(img=>{
-      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between';
-      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px">
-        <img src="${img.url}" style="width:40px;height:40px;border-radius:8px;object-fit:cover"><b>${img.name}</b></div>
-        <button class="btn danger" data-id="${img.id}">حذف</button>`;
-      row.querySelector('button').onclick=()=>{ ST.images=ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); };
-      list.appendChild(row);
-    }); }
-    function renderCaps(){ const list=$('#capList'); list.innerHTML=''; ST.captions.forEach(c=>{
-      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between';
-      row.innerHTML=`<div><b>${c.name}</b><div class="muted" style="font-size:12px;max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.text}</div></div>
-        <button class="btn danger" data-id="${c.id}">حذف</button>`;
-      row.querySelector('button').onclick=()=>{ ST.captions=ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); };
-      list.appendChild(row);
-    }); }
-    function saveImage(){
-      const name=$('#imgName').value.trim(), file=$('#imgFile').files[0]; if(!name||!file) return;
-      const reader=new FileReader(); reader.onload=()=>{ ST.images.push({id:crypto.randomUUID(), name, url:reader.result}); savePersist(); renderImgs(); $('#imgName').value=''; $('#imgFile').value=''; };
-      reader.readAsDataURL(file);
-    }
-    function saveCaption(){ const name=$('#capName').value.trim(), text=$('#capText').value.trim(); if(!name||!text) return;
-      ST.captions.push({id:crypto.randomUUID(), name, text}); savePersist(); renderCaps(); $('#capName').value=''; $('#capText').value='';
-    }
-
-    /* ========= حملات — إرسال Pro ========= */
-    function fillCampaignDropdowns(){
-      const ddA=$('#ddAudience'); ddA.innerHTML=`<option value="">-- اختر جمهورًا --</option>`; ST.audiences.forEach(a=> ddA.add(new Option(`${a.name} (${a.userIds.length})`, a.id)));
-      const ddI=$('#ddImage'); ddI.innerHTML=`<option value="">-- اختر صورة --</option>`; ST.images.forEach(img=> ddI.add(new Option(img.name, img.id)));
-      ddI.onchange=()=>{ const img=ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value=img.url; };
-      const ddC=$('#ddCaption'); ddC.innerHTML=`<option value="">-- اختر نصًا --</option>`; ST.captions.forEach(c=> ddC.add(new Option(c.name, c.id)));
-      ddC.onchange=()=>{ const c=ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value=c.text; };
-      renderSendList([]);
-    }
-    function renderSendList(ids){ const box=$('#sendList'); box.innerHTML=''; ids.forEach(id=>{
-      const u=ST.users.find(x=>x.id===id)||{name:'User',picture:'https://placehold.co/40'};
-      const row=document.createElement('div'); row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between'; row.style.padding='8px'; row.style.border='1px solid var(--card-brd)'; row.style.borderRadius='12px';
-      row.innerHTML=`<div style="display:flex;align-items:center;gap:8px"><img src="${u.picture}" style="width:32px;height:32px;border-radius:8px"><b>${u.name}</b></div>
-                     <span id="st-${id}" class="muted" style="font-size:12px">—</span>`;
-      box.appendChild(row);
-    }); $('#targetCount').textContent=ids.length; }
-    function bindCampaignControls(){ $('#btnStart').onclick=startCampaign; $('#btnPause').onclick=()=>{ ST.sending.paused=true; savePersist(); };
-      $('#btnResume').onclick=()=>{ ST.sending.paused=false; savePersist(); runSender(); }; $('#btnStop').onclick=()=>{ ST.sending.running=false; ST.sending.paused=false; savePersist(); updateSendProgress(); }; }
-    function updateSendProgress(){ $('#sendProg').textContent=`${ST.sending.idx}/${ST.sending.targets.length}`; }
-
-    // سجل منع التكرار
-    const SENT_LOG=LS.get('lc_sent_log',{}); function markSent(id){ if(!SENT_LOG[ST.pageId]) SENT_LOG[ST.pageId]={}; SENT_LOG[ST.pageId][id]=Date.now(); LS.set('lc_sent_log',SENT_LOG); }
-    function wasSent(id){ return !!(SENT_LOG[ST.pageId] && SENT_LOG[ST.pageId][id]); }
-
-    // Rate limiter (Token Bucket)
-    const RATE={perMinute:120}; let tokens=RATE.perMinute, lastRefill=Date.now();
-    function takeToken(){ const now=Date.now(), delta=now-lastRefill, refill=Math.floor(delta/1000)*(RATE.perMinute/60); if(refill>0){ tokens=Math.min(RATE.perMinute,tokens+refill); lastRefill=now; } if(tokens>0){ tokens--; return true; } return false; }
-    const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const jitter=ms=>ms+Math.floor(Math.random()*250);
-
-    async function startCampaign(){
-      if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
-      const audId=$('#ddAudience').value, audience=ST.audiences.find(a=>a.id===audId);
-      if(!audience||audience.userIds.length===0) return toast('خطأ','اختر جمهورًا صحيحًا.');
-      const message=$('#msgText').value.trim(), imageUrl=$('#imgUrl').value.trim(); if(!message && !imageUrl) return toast('خطأ','أدخل رسالة أو صورة.');
-      const delay=Math.max(0, parseInt($('#delay').value||'0',10));
-      ST.sending={running:true,paused:false,idx:0,targets:[...audience.userIds],job:{id:crypto.randomUUID(),name:`Campaign ${new Date().toLocaleString()}`,createdAt:Date.now(),successCount:0,failureCount:0},delay};
-      savePersist(); renderSendList(ST.sending.targets); runSender(message,imageUrl,delay);
-    }
-    async function runSender(message=null,imageUrl=null,delay=null){
-      if(message===null)  message=$('#msgText')?.value?.trim()||''; if(imageUrl===null) imageUrl=$('#imgUrl')?.value?.trim()||''; if(delay===null) delay=Math.max(0, parseInt($('#delay')?.value||ST.sending.delay||'0',10));
-      const url=`https://graph.facebook.com/v20.0/me/messages?access_token=${encodeURIComponent(ST.token)}`; let backoff=1000, maxBackoff=60000;
-      while(ST.sending.running && ST.sending.idx<ST.sending.targets.length){
-        if(ST.sending.paused){ savePersist(); await sleep(300); continue; }
-        const id=ST.sending.targets[ST.sending.idx];
-        if(wasSent(id)){ const st=$('#st-'+id); if(st){st.textContent='⏭️'; st.style.color='#64748b';} ST.sending.idx++; savePersist(); updateSendProgress(); continue; }
-        while(!takeToken()){ await sleep(200); if(!ST.sending.running) return; }
-        const st=$('#st-'+id); if(st){st.textContent='…'; st.style.color='#a16207';}
-        try{
-          const payload={ messaging_type:'RESPONSE', recipient:{id}, message:{} };
-          if(message)  payload.message.text=message;
-          if(imageUrl) payload.message.attachment={ type:'image', payload:{ url:imageUrl, is_reusable:true } };
-          const res=await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
-          const data=await res.json();
-          if(!res.ok||data.error){
-            const code=data?.error?.code;
-            if(code===613||code===4){ await sleep(jitter(backoff)); backoff=Math.min(maxBackoff,Math.round(backoff*1.8)); continue; }
-            throw new Error(data?.error?.message||('HTTP '+res.status));
-          }
-          backoff=1000; ST.sending.job.successCount++; markSent(id);
-          if(st){ st.textContent='✅'; st.style.color='#15803d'; }
-        }catch(e){
-          ST.sending.job.failureCount++; if(st){ st.textContent='❌'; st.style.color='#b91c1c'; }
-        }
-        ST.sending.idx++; savePersist(); updateSendProgress(); if(delay>0) await sleep(delay*1000);
-      }
-      if(ST.sending.idx>=ST.sending.targets.length){
-        const reps=LS.get('lc_reports',[]); reps.push(ST.sending.job); LS.set('lc_reports',reps);
-        ST.sending.running=false; ST.sending.paused=false; savePersist();
-        toast('انتهى الإرسال',`تم: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
-      }
-    }
-
-    /* ========= بيانات الجمهور (تبويب) ========= */
-    function renderAudDataPage(){
-      const wrap=$('#audDataWrap'), empty=$('#audDataEmpty'); wrap.innerHTML='';
-      if(!ST.audiences.length){ empty.style.display='block'; return; } empty.style.display='none';
-      ST.audiences.forEach(a=>{
-        const total=(a.userIds?.length||0), card=document.createElement('div'); card.className='glass'; card.style.padding='12px';
-        card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                          <b>${a.name}</b><span class="badge">${total} مستخدم</span></div>
-                        <div style="display:flex;flex-wrap:wrap;gap:8px">
-                          <button class="btn" data-act="export">تصدير CSV</button>
-                          <button class="btn primary" data-act="rename">إعادة تسمية</button>
-                          <button class="btn danger" data-act="delete">حذف</button>
-                        </div>`;
-        card.querySelector('[data-act="export"]').onclick=()=>exportListCSV(a);
-        card.querySelector('[data-act="rename"]').onclick=()=>{ const nn=prompt('اسم جديد:',a.name); if(nn&&nn.trim()){ a.name=nn.trim(); savePersist(); renderAudDataPage(); } };
-        card.querySelector('[data-act="delete"]').onclick=()=>{ if(confirm('حذف القائمة؟')){ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderAudDataPage(); } };
-        wrap.appendChild(card);
-      });
-      $('#btnExportAllAud')?.addEventListener('click',()=>{
-        const rows=[['list_name','id']]; ST.audiences.forEach(a=> (a.userIds||[]).forEach(id=> rows.push([a.name,id]))); downloadCSV(rows,'audience_lists.csv');
-      });
-    }
-    function exportListCSV(a){ const rows=[['id']].concat((a.userIds||[]).map(id=>[id])); downloadCSV(rows,(a.name||'audience')+'.csv'); }
-    function downloadCSV(rows,filename){ const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n'); const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url); }
-
-    /* ========= تقارير ========= */
-    function renderReports(){
-      const wrap=$('#reportsWrap'), empty=$('#noReports'); const reps=LS.get('lc_reports',[]); wrap.innerHTML=''; if(!reps.length){ empty.style.display='block'; return; } empty.style.display='none';
-      reps.slice().reverse().forEach(c=>{
-        const total=(c.successCount||0)+(c.failureCount||0), card=document.createElement('div'); card.className='glass'; card.style.padding='12px';
-        card.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between">
-                          <b>${c.name||'Campaign'}</b><span style="font-size:12px" class="muted">${new Date(c.createdAt).toLocaleString()}</span></div>
-                        <div class="muted" style="margin-top:6px;font-size:13px">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`;
-        wrap.appendChild(card);
-      });
-    }
-
-    /* ========= Boot ========= */
-    function initAfterLogin(){
-      setConnectedUI(!!ST.token && !!ST.pageId,null);
-      if(ST.fetching.running && !ST.fetching.paused && ST.fetching.next) fetchLoop();
-      if(ST.sending.running && !ST.sending.paused){ renderSendList(ST.sending.targets); runSender(); }
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    }
-    $('#mOk').onclick=()=>$('#modal').style.display='none';
-    render();
-  </script>
+render();
+</script>
 </body>
 </html>
