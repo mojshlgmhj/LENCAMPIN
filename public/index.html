@@ -13,8 +13,8 @@
     .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.35);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.07);}
     .card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;}
     .nav-item.active{background:#fff;color:#1e3a8a;box-shadow:0 1px 10px rgba(0,0,0,.06);}
-    .loader{border:4px solid rgba(0,0,0,.08);border-top:4px solid #111827;border-radius:50%;width:22px;height:22px;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    .badge{font-size:.75rem;padding:.15rem .5rem;border-radius:999px}
+    .mono{font-family: ui-monospace,SFMono-Regular,Menlo,monospace;}
   </style>
 </head>
 <body class="text-gray-800">
@@ -25,24 +25,19 @@
       <h1 class="text-3xl font-extrabold">Linux <span class="text-blue-600">Campaign</span></h1>
       <p class="text-gray-600 mt-3">تسجيل دخول محلي (بدون Firebase)</p>
       <div class="text-right mt-6 space-y-4">
-        <div>
-          <label class="text-sm font-medium">المستخدم</label>
-          <input id="adminUser" class="w-full mt-1 p-3 border rounded-lg" placeholder="admin">
-        </div>
-        <div>
-          <label class="text-sm font-medium">كلمة المرور</label>
-          <input id="adminPass" type="password" class="w-full mt-1 p-3 border rounded-lg" placeholder="••••••••">
-        </div>
+        <label class="block text-sm">المستخدم</label>
+        <input id="adminUser" class="w-full p-3 border rounded" placeholder="admin">
+        <label class="block text-sm">كلمة المرور</label>
+        <input id="adminPass" type="password" class="w-full p-3 border rounded" placeholder="••••••••">
         <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">دخول</button>
         <p id="loginError" class="hidden text-red-600 text-sm">بيانات الدخول غير صحيحة.</p>
-        <p class="text-xs text-gray-500">⚠️ مخصّص للاختبار فقط.</p>
       </div>
     </div>
   </div>
 
   <!-- App -->
   <div id="app" class="hidden h-screen">
-    <div class="h-full grid grid-cols-[260px_1fr]">
+    <div class="h-full grid grid-cols-[280px_1fr]">
       <aside class="glass p-4" id="sidebar">
         <div class="h-16 flex items-center justify-center border-b">
           <h2 class="font-extrabold text-xl">Linux <span class="text-blue-600">Campaign</span></h2>
@@ -79,37 +74,64 @@
 
   <!-- Templates -->
   <template id="tpl-dashboard">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
       <div class="card p-6"><p class="text-gray-500">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card p-6"><p class="text-gray-500">المجموع بالمحفوظ</p><p id="statSaved" class="text-3xl font-bold mt-2">0</p></div>
       <div class="card p-6"><p class="text-gray-500">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
       <div class="card p-6"><p class="text-gray-500">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
     </div>
   </template>
 
   <template id="tpl-audience">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 space-y-4">
-        <div class="glass p-4 flex items-center justify-between">
-          <div class="font-bold">مركز التحكم بالجمهور</div>
-          <div class="flex items-center gap-3">
-            <span class="text-gray-600">المجموع: <b id="audCount">0</b></span>
-            <button id="btnFetch" class="px-4 py-2 bg-blue-600 text-white rounded-lg">بدء السحب</button>
-          </div>
+    <div class="space-y-4">
+      <div class="glass p-4 grid md:grid-cols-2 gap-4 items-center">
+        <div class="font-bold">مركز التحكم بالجمهور</div>
+        <div class="flex flex-wrap gap-2 justify-end">
+          <button id="btnFetchStart"  class="px-3 py-2 bg-blue-600 text-white rounded">بدء السحب</button>
+          <button id="btnFetchPause"  class="px-3 py-2 bg-yellow-500 text-white rounded">إيقاف مؤقت</button>
+          <button id="btnFetchResume" class="px-3 py-2 bg-green-600 text-white rounded">استئناف</button>
+          <button id="btnFetchStop"   class="px-3 py-2 bg-red-600 text-white rounded">إيقاف نهائي</button>
         </div>
-        <div class="glass p-0">
-          <table class="w-full">
-            <thead class="bg-gray-50 sticky top-0">
-              <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
-            </thead>
-            <tbody id="audTable" class="divide-y"></tbody>
-          </table>
+        <div class="md:col-span-2 flex items-center gap-4 text-sm">
+          <span>المجموع: <b id="audCount">0</b></span>
+          <span>المحدد: <b id="selCount">0</b></span>
+          <span class="badge bg-gray-200 text-gray-800">الحالة: <b id="fetchState">متوقف</b></span>
+          <span class="badge bg-gray-200 text-gray-800">الصفحة الحالية: <b id="fetchPage">—</b></span>
+          <span class="badge bg-gray-200 text-gray-800">المضاف حديثًا: <b id="fetchAdded">0</b></span>
         </div>
       </div>
+
+      <div class="glass p-3 flex flex-wrap gap-2 items-center">
+        <button id="btnSaveAud" class="px-3 py-2 bg-yellow-500 text-white rounded disabled:opacity-50">حفظ المحددين</button>
+        <button id="btnExportCSV" class="px-3 py-2 bg-gray-800 text-white rounded">تصدير CSV</button>
+        <button id="btnClearAll" class="px-3 py-2 bg-red-700 text-white rounded">حذف كل الجمهور</button>
+        <div class="ml-auto flex gap-2 items-center">
+          <input id="filterTxt" class="p-2 border rounded" placeholder="فلترة بالاسم أو ID">
+          <button id="btnApplyFilter" class="px-3 py-2 bg-gray-700 text-white rounded">فلترة</button>
+          <button id="btnResetFilter" class="px-3 py-2 bg-gray-500 text-white rounded">إلغاء</button>
+        </div>
+      </div>
+
+      <div class="glass p-0 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 sticky top-0">
+            <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
+          </thead>
+          <tbody id="audTable" class="divide-y"></tbody>
+        </table>
+      </div>
+
       <div class="glass p-4">
         <div class="font-bold mb-2">قوائم الجمهور المحفوظة</div>
         <div class="space-y-2" id="audSaved"></div>
-        <div class="pt-3">
-          <button id="btnSaveAud" class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50">حفظ المحددين</button>
+      </div>
+
+      <div class="glass p-4 space-y-2">
+        <div class="font-bold">استيراد IDs (كل ID في سطر)</div>
+        <textarea id="idsImport" class="w-full h-32 p-2 border rounded mono" placeholder="12345&#10;67890"></textarea>
+        <div class="flex gap-2">
+          <button id="btnImportIds" class="px-3 py-2 bg-blue-700 text-white rounded">استيراد</button>
+          <button id="btnClearImport" class="px-3 py-2 bg-gray-600 text-white rounded">تفريغ</button>
         </div>
       </div>
     </div>
@@ -155,12 +177,16 @@
           <select id="ddCaption" class="w-full p-2 border rounded"></select>
           <textarea id="msgText" class="w-full p-2 border rounded mt-2 h-28" placeholder="أو اكتب رسالتك"></textarea>
         </div>
-        <div class="flex items-end gap-3">
+        <div class="flex flex-wrap items-end gap-3">
           <div>
             <label class="block text-sm font-medium">الفاصل (ثانية)</label>
             <input id="delay" type="number" value="5" min="1" class="w-28 p-2 border rounded" />
           </div>
-          <button id="btnStart" class="px-6 py-3 bg-blue-600 text-white rounded-lg">إرسال الحملة</button>
+          <button id="btnStart"  class="px-4 py-2 bg-blue-600 text-white rounded">بدء الإرسال</button>
+          <button id="btnPause"  class="px-4 py-2 bg-yellow-500 text-white rounded">إيقاف مؤقت</button>
+          <button id="btnResume" class="px-4 py-2 bg-green-600 text-white rounded">استئناف</button>
+          <button id="btnStop"   class="px-4 py-2 bg-red-600 text-white rounded">إيقاف نهائي</button>
+          <span class="ml-auto text-sm">التقدم: <b id="sendProg">0/0</b></span>
         </div>
       </div>
       <div class="glass p-4">
@@ -190,6 +216,7 @@
         <div class="flex items-center gap-3">
           <span>admin</span>
           <button id="btnLogout" class="px-4 py-2 bg-gray-700 text-white rounded-lg">تسجيل الخروج</button>
+          <button id="btnClearCache" class="px-4 py-2 bg-red-700 text-white rounded-lg">تفريغ كل البيانات</button>
         </div>
       </div>
     </div>
@@ -214,13 +241,18 @@
       connected: false,
       pageId: LS.get('lc_pageId', null),
       token:  LS.get('lc_token', null),
-      users:  LS.get('lc_users', []),       // [{id,name,picture}]
-      images: LS.get('lc_images', []),      // [{id,name,url(Base64)}]
-      captions: LS.get('lc_captions', []),  // [{id,name,text}]
-      audiences: LS.get('lc_audiences', []),// [{id,name,userIds:[]}]
-      campaigns: LS.get('lc_campaigns', []),
-      selected: new Set(),
-      sending: {running:false,paused:false,idx:0,targets:[],job:null}
+
+      users:  LS.get('lc_users', []),          // [{id,name,picture}]
+      audiences: LS.get('lc_audiences', []),   // [{id,name,userIds:[]}]
+      images: LS.get('lc_images', []),         // [{id,name,url(Base64)}]
+      captions: LS.get('lc_captions', []),     // [{id,name,text}]
+
+      // fetch state (persistent)
+      fetching: LS.get('lc_fetching', {running:false, paused:false, next:null, page:0}),
+      fetchAdded: 0,
+
+      // sending state (persistent)
+      sending: LS.get('lc_sending', {running:false, paused:false, idx:0, targets:[], job:null, delay:5})
     };
 
     // ====== Helpers/UI
@@ -235,6 +267,14 @@
       $('#statusDot').classList.toggle('bg-green-500', yes);
       $('#statusDot').classList.toggle('bg-red-500', !yes);
       $('#bannerDisconnected').classList.toggle('hidden', yes);
+    }
+    function savePersist(){
+      LS.set('lc_users', ST.users);
+      LS.set('lc_audiences', ST.audiences);
+      LS.set('lc_images', ST.images);
+      LS.set('lc_captions', ST.captions);
+      LS.set('lc_fetching', ST.fetching);
+      LS.set('lc_sending', ST.sending);
     }
 
     // ====== Login (local only)
@@ -256,17 +296,19 @@
       dashboard(root){
         root.innerHTML = $('#tpl-dashboard').innerHTML;
         $('#statTotal').textContent = ST.users.length;
-        const sent = ST.campaigns.reduce((a,c)=>a+(c.successCount||0),0);
-        const total= ST.campaigns.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
+        const totalSaved = ST.audiences.reduce((a,c)=>a+(c.userIds?.length||0),0);
+        $('#statSaved').textContent = totalSaved;
+        const sent = (LS.get('lc_reports', [])).reduce((a,c)=>a+(c.successCount||0),0);
+        const tot  = (LS.get('lc_reports', [])).reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
         $('#statSent').textContent = sent;
-        $('#statRate').textContent = total? Math.round((sent/total)*100)+'%':'0%';
+        $('#statRate').textContent = tot? Math.round((sent/tot)*100)+'%':'0%';
       },
       audience(root){
         root.innerHTML = $('#tpl-audience').innerHTML;
-        $('#audCount').textContent = ST.users.length;
+        bindAudienceUI();
         renderAudienceTable();
-        $('#btnFetch').onclick = fetchUsers;
-        $('#btnSaveAud').onclick = saveSelectedAudience;
+        renderSavedAudiences();
+        updateFetchBadges();
       },
       content(root){
         root.innerHTML = $('#tpl-content').innerHTML;
@@ -277,7 +319,8 @@
       campaigns(root){
         root.innerHTML = $('#tpl-campaigns').innerHTML;
         fillCampaignDropdowns();
-        $('#btnStart').onclick = startCampaign;
+        bindCampaignControls();
+        updateSendProgress();
       },
       reports(root){
         root.innerHTML = $('#tpl-reports').innerHTML;
@@ -285,10 +328,11 @@
       },
       settings(root){
         root.innerHTML = $('#tpl-settings').innerHTML;
-        $('#pageId').value = ST.pageId || '';
-        $('#accessToken').value = ST.token || '';
+        $('#pageId').value     = ST.pageId || '';
+        $('#accessToken').value= ST.token  || '';
         $('#btnConnect').onclick = () => connect($('#pageId').value.trim(), $('#accessToken').value.trim());
         $('#btnLogout').onclick  = () => { localStorage.removeItem('lc_logged'); location.reload(); };
+        $('#btnClearCache').onclick = () => { if(confirm('تفريغ كل البيانات المحلية؟')){ localStorage.clear(); location.reload(); } };
       }
     };
 
@@ -318,42 +362,131 @@
       }
     }
 
-    // ====== Audience
-    function renderAudienceTable(){
+    // ====== Audience (fetch / save / import / export)
+    function bindAudienceUI(){
+      $('#btnFetchStart').onclick = fetchStart;
+      $('#btnFetchPause').onclick = fetchPause;
+      $('#btnFetchResume').onclick= fetchResume;
+      $('#btnFetchStop').onclick  = fetchStop;
+
+      $('#btnSaveAud').onclick    = saveSelectedAudience;
+      $('#btnExportCSV').onclick  = exportCSV;
+      $('#btnClearAll').onclick   = () => { if(confirm('حذف كل الجمهور؟')){ ST.users = []; savePersist(); renderAudienceTable(); } };
+
+      $('#btnApplyFilter').onclick= applyFilter;
+      $('#btnResetFilter').onclick= ()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
+
+      $('#btnImportIds').onclick  = importIds;
+      $('#btnClearImport').onclick= ()=> $('#idsImport').value='';
+    }
+    function updateFetchBadges(){
+      $('#audCount').textContent = ST.users.length;
+      $('#selCount').textContent = ST._selectedCount || 0;
+      $('#fetchState').textContent= ST.fetching.running ? (ST.fetching.paused ? 'متوقف مؤقتًا' : 'يعمل') : 'متوقف';
+      $('#fetchPage').textContent = ST.fetching.page || '—';
+      $('#fetchAdded').textContent= ST.fetchAdded || 0;
+    }
+    function renderAudienceTable(filter=''){
       const body = $('#audTable'); body.innerHTML='';
-      ST.users.forEach(u=>{
+      const rows = (filter? ST.users.filter(u => (u.name||'').includes(filter) || (u.id||'').includes(filter)) : ST.users);
+      rows.forEach(u=>{
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-3"><input type="checkbox" data-id="${u.id}"></td>
-                        <td class="p-3"><div class="flex items-center gap-2">
+        tr.innerHTML = `<td class="p-2"><input type="checkbox" data-id="${u.id}"></td>
+                        <td class="p-2"><div class="flex items-center gap-2">
                           <img src="${u.picture||'https://placehold.co/40'}" class="w-8 h-8 rounded"/><b>${u.name||'User'}</b></div></td>
-                        <td class="p-3 font-mono text-gray-600">${u.id}</td>`;
+                        <td class="p-2 mono text-gray-700">${u.id}</td>`;
         body.appendChild(tr);
       });
-      $('#audCount').textContent = ST.users.length;
       body.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.onchange = (e)=>{
         const id = e.target.dataset.id;
-        if(e.target.checked) ST.selected.add(id); else ST.selected.delete(id);
+        if(!ST._selected) ST._selected = new Set();
+        if(e.target.checked) ST._selected.add(id); else ST._selected.delete(id);
+        ST._selectedCount = ST._selected.size;
+        updateFetchBadges();
       });
+      updateFetchBadges();
+    }
+    function applyFilter(){ renderAudienceTable($('#filterTxt').value.trim()); }
+
+    function exportCSV(){
+      const rows = [['id','name','picture']].concat(ST.users.map(u=>[u.id||'', u.name||'', u.picture||'']));
+      const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+      const a = document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url);
+    }
+    function importIds(){
+      const lines = $('#idsImport').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      if(lines.length===0) return;
+      const seen = new Set(ST.users.map(u=>u.id));
+      let added=0;
+      lines.forEach(id=>{ if(!seen.has(id)){ seen.add(id); ST.users.push({id, name:'User', picture:'https://placehold.co/40'}) ; added++; }});
+      ST.fetchAdded += added;
+      savePersist(); renderAudienceTable(); updateFetchBadges();
+      toast('تم الاستيراد', `أضيف ${added} معرفًا.`);
     }
 
-    async function fetchUsers(){
-      if(!ST.connected) return toast('غير متصل','ادخل الإعدادات أولاً.');
-      let next = `https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
-      const seen = new Set(ST.users.map(u=>u.id));
-      try{
-        while(next){
-          const res = await fetch(next);
+    async function fetchLoop(){
+      let backoff = 2; // ثواني (يزيد لو في Rate Limit)
+      while(ST.fetching.running && !ST.fetching.paused && ST.fetching.next){
+        try{
+          const res = await fetch(ST.fetching.next);
           const data = await res.json();
-          if(data.error) throw new Error(data.error.message);
+          if(data.error){
+            // لو Rate limit (code 4/613) نزود الباك أوف
+            if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
+              await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
+              continue;
+            }
+            throw new Error(data.error.message);
+          }
+          backoff = 2;
+          const seen = new Set(ST.users.map(u=>u.id));
           (data.data||[]).forEach(conv=>{
             const u = (conv.participants?.data||[]).find(p=>p.id!==ST.pageId);
-            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id, name:u.name, picture:u.picture?.data?.url}); }
+            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id, name:u.name, picture:u.picture?.data?.url}); ST.fetchAdded++; }
           });
-          next = data.paging?.next;
-          LS.set('lc_users', ST.users);
-          renderAudienceTable();
+          ST.fetching.next = data.paging?.next || null;
+          ST.fetching.page = (ST.fetching.page||0)+1;
+          savePersist();
+          renderAudienceTable($('#filterTxt')?.value||'');
+          updateFetchBadges();
+          // تهوية بسيطة بين الصفحات
+          await new Promise(r=>setTimeout(r, 800));
+          if(!ST.fetching.next) { ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('انتهى السحب','لا مزيد من الصفحات.'); }
+        }catch(e){
+          ST.fetching.running=false; savePersist(); updateFetchBadges();
+          toast('خطأ في السحب', e.message||String(e));
         }
-      }catch(e){ toast('خطأ في السحب', e.message); }
+      }
+    }
+    function fetchStart(){
+      if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
+      ST.fetching.running=true; ST.fetching.paused=false;
+      ST.fetching.next = `https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
+      ST.fetching.page=0; ST.fetchAdded=0;
+      savePersist(); updateFetchBadges(); fetchLoop();
+    }
+    function fetchPause(){ if(ST.fetching.running){ ST.fetching.paused=true; savePersist(); updateFetchBadges(); } }
+    function fetchResume(){ if(ST.fetching.next){ ST.fetching.paused=false; ST.fetching.running=true; savePersist(); updateFetchBadges(); fetchLoop(); } }
+    function fetchStop(){ ST.fetching.running=false; ST.fetching.paused=false; savePersist(); updateFetchBadges(); }
+
+    function renderSavedAudiences(){
+      const box = $('#audSaved'); if(!box) return; box.innerHTML='';
+      ST.audiences.forEach(a=>{
+        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
+        row.innerHTML = `<div><b>${a.name}</b> <span class="text-gray-500 text-sm">(${a.userIds.length})</span></div>
+                         <button class="text-red-600" data-id="${a.id}">حذف</button>`;
+        row.querySelector('button').onclick = ()=>{ ST.audiences = ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); };
+        box.appendChild(row);
+      });
+    }
+    function saveSelectedAudience(){
+      const ids = ST._selected ? Array.from(ST._selected) : [];
+      if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
+      const name = prompt('اسم القائمة:'); if(!name) return;
+      ST.audiences.push({id: crypto.randomUUID(), name, userIds: ids});
+      savePersist(); renderSavedAudiences(); ST._selected.clear(); ST._selectedCount=0; updateFetchBadges();
+      toast('تم','تم حفظ القائمة.');
     }
 
     // ====== Content (localStorage)
@@ -364,7 +497,7 @@
         row.innerHTML = `<div class="flex items-center gap-2">
             <img src="${img.url}" class="w-10 h-10 rounded object-cover"><b>${img.name}</b></div>
           <button class="text-red-600" data-id="${img.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.images = ST.images.filter(x=>x.id!==img.id); LS.set('lc_images', ST.images); renderImgs(); };
+        row.querySelector('button').onclick = ()=>{ ST.images = ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); };
         list.appendChild(row);
       });
     }
@@ -374,7 +507,7 @@
         const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
         row.innerHTML = `<div><b>${c.name}</b><div class="text-gray-500 text-sm max-w-sm truncate">${c.text}</div></div>
           <button class="text-red-600" data-id="${c.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.captions = ST.captions.filter(x=>x.id!==c.id); LS.set('lc_captions', ST.captions); renderCaps(); };
+        row.querySelector('button').onclick = ()=>{ ST.captions = ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); };
         list.appendChild(row);
       });
     }
@@ -385,7 +518,7 @@
       const reader = new FileReader();
       reader.onload = () => {
         ST.images.push({id: crypto.randomUUID(), name, url: reader.result});
-        LS.set('lc_images', ST.images); renderImgs();
+        savePersist(); renderImgs();
         $('#imgName').value=''; $('#imgFile').value='';
       };
       reader.readAsDataURL(file);
@@ -395,33 +528,11 @@
       const text = $('#capText').value.trim();
       if(!name || !text) return;
       ST.captions.push({id: crypto.randomUUID(), name, text});
-      LS.set('lc_captions', ST.captions); renderCaps();
+      savePersist(); renderCaps();
       $('#capName').value=''; $('#capText').value='';
     }
 
-    // ====== Audiences
-    function renderSavedAudiences(){
-      const box = $('#audSaved'); if(!box) return; box.innerHTML='';
-      ST.audiences.forEach(a=>{
-        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
-        row.innerHTML = `<div><b>${a.name}</b> <span class="text-gray-500 text-sm">(${a.userIds.length})</span></div>
-                         <button class="text-red-600" data-id="${a.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.audiences = ST.audiences.filter(x=>x.id!==a.id); LS.set('lc_audiences', ST.audiences); renderSavedAudiences(); };
-        box.appendChild(row);
-      });
-    }
-    function saveSelectedAudience(){
-      const ids = Array.from(ST.selected);
-      if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
-      const name = prompt('اسم القائمة:'); if(!name) return;
-      ST.audiences.push({id: crypto.randomUUID(), name, userIds: ids});
-      LS.set('lc_audiences', ST.audiences);
-      renderSavedAudiences();
-      ST.selected.clear();
-      toast('تم','تم حفظ القائمة.');
-    }
-
-    // ====== Campaigns (direct browser → Graph)
+    // ====== Campaigns (direct browser → Graph) with pause/resume
     function fillCampaignDropdowns(){
       const ddA = $('#ddAudience'); ddA.innerHTML = `<option value="">-- اختر جمهورًا --</option>`;
       ST.audiences.forEach(a=> ddA.add(new Option(`${a.name} (${a.userIds.length})`, a.id)));
@@ -444,6 +555,15 @@
       });
       $('#targetCount').textContent = ids.length;
     }
+    function bindCampaignControls(){
+      $('#btnStart').onclick = startCampaign;
+      $('#btnPause').onclick = ()=>{ ST.sending.paused=true; savePersist(); };
+      $('#btnResume').onclick= ()=>{ ST.sending.paused=false; savePersist(); runSender(); };
+      $('#btnStop').onclick  = ()=>{ ST.sending.running=false; ST.sending.paused=false; savePersist(); updateSendProgress(); };
+    }
+    function updateSendProgress(){
+      $('#sendProg').textContent = `${ST.sending.idx}/${ST.sending.targets.length}`;
+    }
     async function startCampaign(){
       if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
       const audId = $('#ddAudience').value;
@@ -453,25 +573,43 @@
       const imageUrl = $('#imgUrl').value.trim();
       if(!message && !imageUrl) return toast('خطأ','أدخل رسالة أو صورة.');
       const delay = Math.max(1, parseInt($('#delay').value||'5',10));
-      renderSendList(audience.userIds);
+
       ST.sending = {running:true, paused:false, idx:0, targets:[...audience.userIds], job:{
-        id: crypto.randomUUID(), name:'Campaign', createdAt: Date.now(), successCount:0, failureCount:0
-      }};
-      await runSender(message, imageUrl, delay);
+        id: crypto.randomUUID(), name:`Campaign ${new Date().toLocaleString()}`, createdAt: Date.now(), successCount:0, failureCount:0
+      }, delay};
+      savePersist();
+
+      renderSendList(ST.sending.targets);
+      runSender(message, imageUrl, delay);
     }
-    async function runSender(message, imageUrl, delay){
+    async function runSender(message=null, imageUrl=null, delay=null){
+      // لو تم الاستئناف بعد إعادة تحميل
+      if(message===null)  message  = $('#msgText')?.value?.trim() || '';
+      if(imageUrl===null) imageUrl = $('#imgUrl')?.value?.trim() || '';
+      if(delay===null)    delay    = Math.max(1, parseInt($('#delay')?.value||ST.sending.delay||'5',10));
+
       const url = `https://graph.facebook.com/v20.0/me/messages?access_token=${encodeURIComponent(ST.token)}`;
+      let backoff = 2;
       while(ST.sending.running && ST.sending.idx < ST.sending.targets.length){
+        if(ST.sending.paused){ savePersist(); await new Promise(r=>setTimeout(r, 500)); continue; }
         const id = ST.sending.targets[ST.sending.idx];
-        $('#st-'+id)?.classList.remove('text-gray-500');
-        $('#st-'+id)?.classList.add('text-yellow-700'); $('#st-'+id).textContent='...';
+        $('#st-'+id)?.classList.remove('text-gray-500'); $('#st-'+id)?.classList.add('text-yellow-700'); $('#st-'+id).textContent='...';
         try{
           const payload = { messaging_type:'RESPONSE', recipient:{id}, message:{} };
-          if(message) payload.message.text = message;
+          if(message)  payload.message.text = message;
           if(imageUrl) payload.message.attachment = { type:'image', payload:{ url:imageUrl, is_reusable:true } };
+
           const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
           const data = await res.json();
-          if(data.error) throw new Error(data.error.message);
+          if(data.error){
+            // Rate limit backoff
+            if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
+              await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
+              continue; // أعد المحاولة لنفس الهدف
+            }
+            throw new Error(data.error.message);
+          }
+          backoff = 2;
           ST.sending.job.successCount++;
           $('#st-'+id).textContent='✅'; $('#st-'+id).className='text-green-700';
         }catch(e){
@@ -479,20 +617,24 @@
           $('#st-'+id).textContent='❌'; $('#st-'+id).className='text-red-700';
         }
         ST.sending.idx++;
+        savePersist(); updateSendProgress();
         await new Promise(r=>setTimeout(r, delay*1000));
       }
-      ST.campaigns.push(ST.sending.job);
-      LS.set('lc_campaigns', ST.campaigns);
-      toast('انتهى الإرسال', `تم الإرسال: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
-      render();
+      if(ST.sending.idx >= ST.sending.targets.length){
+        const reports = LS.get('lc_reports', []);
+        reports.push(ST.sending.job); LS.set('lc_reports', reports);
+        ST.sending.running=false; ST.sending.paused=false; savePersist();
+        toast('انتهى الإرسال', `تم: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
+      }
     }
 
     // ====== Reports
     function renderReports(){
       const wrap = $('#reportsWrap'); const empty = $('#noReports');
-      wrap.innerHTML=''; if(ST.campaigns.length===0){ empty.classList.remove('hidden'); return; }
+      const reports = LS.get('lc_reports', []);
+      wrap.innerHTML=''; if(reports.length===0){ empty.classList.remove('hidden'); return; }
       empty.classList.add('hidden');
-      ST.campaigns.slice().reverse().forEach(c=>{
+      reports.slice().reverse().forEach(c=>{
         const total = (c.successCount||0)+(c.failureCount||0);
         const card = document.createElement('div'); card.className='glass p-4';
         card.innerHTML = `<div class="flex items-center justify-between">
@@ -505,7 +647,11 @@
     // ====== Boot
     function initAfterLogin(){
       setConnectedUI(!!ST.token && !!ST.pageId, null);
-      renderSavedAudiences();
+      if(ST.fetching.running && !ST.fetching.paused && ST.fetching.next) fetchLoop();
+      if(ST.sending.running && !ST.sending.paused){
+        renderSendList(ST.sending.targets);
+        runSender();
+      }
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
 
