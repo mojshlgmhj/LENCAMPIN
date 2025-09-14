@@ -5,19 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Linux Campaign — Local (No Firebase)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body{font-family:'Cairo',sans-serif;background:#eef3f7;}
-    .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.35);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.07);}
-    .card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;}
-    .nav-item.active{background:#fff;color:#1e3a8a;box-shadow:0 1px 10px rgba(0,0,0,.06);}
-    .badge{font-size:.75rem;padding:.15rem .5rem;border-radius:999px}
-    .mono{font-family: ui-monospace,SFMono-Regular,Menlo,monospace;}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:#eef3f7;color:#111827}
+    .glass{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px}
+    .nav-item.active{background:#fff;color:#1e3a8a;box-shadow:0 1px 10px rgba(0,0,0,.06)}
+    .badge{display:inline-block;font-size:12px;padding:.2rem .6rem;border-radius:999px;background:#eef2ff;color:#1e3a8a}
+    .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    .inner-scroll{max-height:60vh;overflow-y:auto}
   </style>
 </head>
-<body class="text-gray-800">
+<body>
 
   <!-- Login -->
   <div id="loginOverlay" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50">
@@ -25,10 +23,14 @@
       <h1 class="text-3xl font-extrabold">Linux <span class="text-blue-600">Campaign</span></h1>
       <p class="text-gray-600 mt-3">تسجيل دخول محلي (بدون Firebase)</p>
       <div class="text-right mt-6 space-y-4">
-        <label class="block text-sm">المستخدم</label>
-        <input id="adminUser" class="w-full p-3 border rounded" placeholder="admin">
-        <label class="block text-sm">كلمة المرور</label>
-        <input id="adminPass" type="password" class="w-full p-3 border rounded" placeholder="••••••••">
+        <div>
+          <label class="text-sm font-medium">المستخدم</label>
+          <input id="adminUser" class="w-full mt-1 p-3 border rounded-lg" placeholder="admin">
+        </div>
+        <div>
+          <label class="text-sm font-medium">كلمة المرور</label>
+          <input id="adminPass" type="password" class="w-full mt-1 p-3 border rounded-lg" placeholder="••••••••">
+        </div>
         <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">دخول</button>
         <p id="loginError" class="hidden text-red-600 text-sm">بيانات الدخول غير صحيحة.</p>
       </div>
@@ -37,7 +39,7 @@
 
   <!-- App -->
   <div id="app" class="hidden h-screen">
-    <div class="h-full grid grid-cols-[280px_1fr]">
+    <div class="h-full grid grid-cols-[260px_1fr]">
       <aside class="glass p-4" id="sidebar">
         <div class="h-16 flex items-center justify-center border-b">
           <h2 class="font-extrabold text-xl">Linux <span class="text-blue-600">Campaign</span></h2>
@@ -46,6 +48,10 @@
           <a href="#dashboard" id="navDashboard" class="nav-item block px-4 py-2 rounded-lg">لوحة المعلومات</a>
           <a href="#audience"  id="navAudience"  class="nav-item block px-4 py-2 rounded-lg">الجمهور</a>
           <a href="#content"   id="navContent"   class="nav-item block px-4 py-2 rounded-lg">المحتوى</a>
+
+          <!-- الجديد: تبويب بيانات الجمهور -->
+          <a href="#auddata"   id="navAuddata"   class="nav-item block px-4 py-2 rounded-lg">بيانات الجمهور</a>
+
           <a href="#campaigns" id="navCampaigns" class="nav-item block px-4 py-2 rounded-lg">إنشاء حملة</a>
           <a href="#reports"   id="navReports"   class="nav-item block px-4 py-2 rounded-lg">التقارير</a>
         </nav>
@@ -74,11 +80,10 @@
 
   <!-- Templates -->
   <template id="tpl-dashboard">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-      <div class="card p-6"><p class="text-gray-500">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
-      <div class="card p-6"><p class="text-gray-500">المجموع بالمحفوظ</p><p id="statSaved" class="text-3xl font-bold mt-2">0</p></div>
-      <div class="card p-6"><p class="text-gray-500">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
-      <div class="card p-6"><p class="text-gray-500">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card"><p class="text-gray-500">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card"><p class="text-gray-500">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card"><p class="text-gray-500">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
     </div>
   </template>
 
@@ -91,13 +96,17 @@
           <button id="btnFetchPause"  class="px-3 py-2 bg-yellow-500 text-white rounded">إيقاف مؤقت</button>
           <button id="btnFetchResume" class="px-3 py-2 bg-green-600 text-white rounded">استئناف</button>
           <button id="btnFetchStop"   class="px-3 py-2 bg-red-600 text-white rounded">إيقاف نهائي</button>
+
+          <!-- الجديد: حفظ الجمهور المسحوب -->
+          <button id="btnSaveWhole"   class="px-3 py-2 bg-purple-600 text-white rounded">حفظ الجمهور المسحوب</button>
         </div>
+
         <div class="md:col-span-2 flex items-center gap-4 text-sm">
           <span>المجموع: <b id="audCount">0</b></span>
           <span>المحدد: <b id="selCount">0</b></span>
-          <span class="badge bg-gray-200 text-gray-800">الحالة: <b id="fetchState">متوقف</b></span>
-          <span class="badge bg-gray-200 text-gray-800">الصفحة الحالية: <b id="fetchPage">—</b></span>
-          <span class="badge bg-gray-200 text-gray-800">المضاف حديثًا: <b id="fetchAdded">0</b></span>
+          <span class="badge">الحالة: <b id="fetchState">متوقف</b></span>
+          <span class="badge">الصفحة الحالية: <b id="fetchPage">—</b></span>
+          <span class="badge">المضاف حديثًا: <b id="fetchAdded">0</b></span>
         </div>
       </div>
 
@@ -112,28 +121,36 @@
         </div>
       </div>
 
-      <div class="glass p-0 overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-gray-50 sticky top-0">
-            <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
-          </thead>
-          <tbody id="audTable" class="divide-y"></tbody>
-        </table>
+      <div class="glass p-0">
+        <!-- الجديد: سكرول داخلي -->
+        <div class="inner-scroll">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-50 sticky top-0 z-10">
+              <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
+            </thead>
+            <tbody id="audTable" class="divide-y"></tbody>
+          </table>
+        </div>
       </div>
 
       <div class="glass p-4">
         <div class="font-bold mb-2">قوائم الجمهور المحفوظة</div>
         <div class="space-y-2" id="audSaved"></div>
       </div>
+    </div>
+  </template>
 
-      <div class="glass p-4 space-y-2">
-        <div class="font-bold">استيراد IDs (كل ID في سطر)</div>
-        <textarea id="idsImport" class="w-full h-32 p-2 border rounded mono" placeholder="12345&#10;67890"></textarea>
+  <!-- الجديد: تبويب بيانات الجمهور -->
+  <template id="tpl-auddata">
+    <div class="space-y-4">
+      <div class="glass p-4 flex items-center justify-between">
+        <div class="font-bold">قوائم “بيانات الجمهور”</div>
         <div class="flex gap-2">
-          <button id="btnImportIds" class="px-3 py-2 bg-blue-700 text-white rounded">استيراد</button>
-          <button id="btnClearImport" class="px-3 py-2 bg-gray-600 text-white rounded">تفريغ</button>
+          <button id="btnExportAllAud" class="px-3 py-2 bg-gray-800 text-white rounded">تصدير كل القوائم CSV</button>
         </div>
       </div>
+      <div id="audDataWrap" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <p id="audDataEmpty" class="hidden text-center text-gray-500">لا توجد قوائم محفوظة بعد.</p>
     </div>
   </template>
 
@@ -247,11 +264,9 @@
       images: LS.get('lc_images', []),         // [{id,name,url(Base64)}]
       captions: LS.get('lc_captions', []),     // [{id,name,text}]
 
-      // fetch state (persistent)
       fetching: LS.get('lc_fetching', {running:false, paused:false, next:null, page:0}),
       fetchAdded: 0,
 
-      // sending state (persistent)
       sending: LS.get('lc_sending', {running:false, paused:false, idx:0, targets:[], job:null, delay:5})
     };
 
@@ -296,8 +311,6 @@
       dashboard(root){
         root.innerHTML = $('#tpl-dashboard').innerHTML;
         $('#statTotal').textContent = ST.users.length;
-        const totalSaved = ST.audiences.reduce((a,c)=>a+(c.userIds?.length||0),0);
-        $('#statSaved').textContent = totalSaved;
         const sent = (LS.get('lc_reports', [])).reduce((a,c)=>a+(c.successCount||0),0);
         const tot  = (LS.get('lc_reports', [])).reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
         $('#statSent').textContent = sent;
@@ -309,6 +322,11 @@
         renderAudienceTable();
         renderSavedAudiences();
         updateFetchBadges();
+      },
+      /* الجديد: تبويب بيانات الجمهور */
+      auddata(root){
+        root.innerHTML = $('#tpl-auddata').innerHTML;
+        renderAudDataPage();
       },
       content(root){
         root.innerHTML = $('#tpl-content').innerHTML;
@@ -362,7 +380,7 @@
       }
     }
 
-    // ====== Audience (fetch / save / import / export)
+    // ====== Audience (fetch / save / export)
     function bindAudienceUI(){
       $('#btnFetchStart').onclick = fetchStart;
       $('#btnFetchPause').onclick = fetchPause;
@@ -376,8 +394,9 @@
       $('#btnApplyFilter').onclick= applyFilter;
       $('#btnResetFilter').onclick= ()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
 
-      $('#btnImportIds').onclick  = importIds;
-      $('#btnClearImport').onclick= ()=> $('#idsImport').value='';
+      // الجديد: حفظ كل الجمهور الحالي
+      const btnWhole = $('#btnSaveWhole');
+      if(btnWhole) btnWhole.onclick = saveWholeAudience;
     }
     function updateFetchBadges(){
       $('#audCount').textContent = ST.users.length;
@@ -407,32 +426,30 @@
       updateFetchBadges();
     }
     function applyFilter(){ renderAudienceTable($('#filterTxt').value.trim()); }
-
     function exportCSV(){
       const rows = [['id','name','picture']].concat(ST.users.map(u=>[u.id||'', u.name||'', u.picture||'']));
       const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
       const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
       const a = document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url);
     }
-    function importIds(){
-      const lines = $('#idsImport').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-      if(lines.length===0) return;
-      const seen = new Set(ST.users.map(u=>u.id));
-      let added=0;
-      lines.forEach(id=>{ if(!seen.has(id)){ seen.add(id); ST.users.push({id, name:'User', picture:'https://placehold.co/40'}) ; added++; }});
-      ST.fetchAdded += added;
-      savePersist(); renderAudienceTable(); updateFetchBadges();
-      toast('تم الاستيراد', `أضيف ${added} معرفًا.`);
+    function saveWholeAudience(){
+      if(!ST.users.length) return toast('لا يوجد جمهور','اسحب الجمهور أولًا.');
+      const name = prompt('اسم قائمة الجمهور:');
+      if(!name) return;
+      const ids = ST.users.map(u=> u.id).filter(Boolean);
+      ST.audiences.push({id: crypto.randomUUID(), name: name.trim(), userIds: ids});
+      savePersist();
+      toast('تم','تم حفظ كل الجمهور ضمن “بيانات الجمهور”.');
+      renderSavedAudiences?.();
     }
 
     async function fetchLoop(){
-      let backoff = 2; // ثواني (يزيد لو في Rate Limit)
+      let backoff = 2;
       while(ST.fetching.running && !ST.fetching.paused && ST.fetching.next){
         try{
           const res = await fetch(ST.fetching.next);
           const data = await res.json();
           if(data.error){
-            // لو Rate limit (code 4/613) نزود الباك أوف
             if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
               await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
               continue;
@@ -450,7 +467,6 @@
           savePersist();
           renderAudienceTable($('#filterTxt')?.value||'');
           updateFetchBadges();
-          // تهوية بسيطة بين الصفحات
           await new Promise(r=>setTimeout(r, 800));
           if(!ST.fetching.next) { ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('انتهى السحب','لا مزيد من الصفحات.'); }
         }catch(e){
@@ -485,7 +501,7 @@
       if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
       const name = prompt('اسم القائمة:'); if(!name) return;
       ST.audiences.push({id: crypto.randomUUID(), name, userIds: ids});
-      savePersist(); renderSavedAudiences(); ST._selected.clear(); ST._selectedCount=0; updateFetchBadges();
+      savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges();
       toast('تم','تم حفظ القائمة.');
     }
 
@@ -532,7 +548,7 @@
       $('#capName').value=''; $('#capText').value='';
     }
 
-    // ====== Campaigns (direct browser → Graph) with pause/resume
+    // ====== Campaigns
     function fillCampaignDropdowns(){
       const ddA = $('#ddAudience'); ddA.innerHTML = `<option value="">-- اختر جمهورًا --</option>`;
       ST.audiences.forEach(a=> ddA.add(new Option(`${a.name} (${a.userIds.length})`, a.id)));
@@ -583,7 +599,6 @@
       runSender(message, imageUrl, delay);
     }
     async function runSender(message=null, imageUrl=null, delay=null){
-      // لو تم الاستئناف بعد إعادة تحميل
       if(message===null)  message  = $('#msgText')?.value?.trim() || '';
       if(imageUrl===null) imageUrl = $('#imgUrl')?.value?.trim() || '';
       if(delay===null)    delay    = Math.max(1, parseInt($('#delay')?.value||ST.sending.delay||'5',10));
@@ -598,14 +613,12 @@
           const payload = { messaging_type:'RESPONSE', recipient:{id}, message:{} };
           if(message)  payload.message.text = message;
           if(imageUrl) payload.message.attachment = { type:'image', payload:{ url:imageUrl, is_reusable:true } };
-
           const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
           const data = await res.json();
           if(data.error){
-            // Rate limit backoff
             if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
               await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
-              continue; // أعد المحاولة لنفس الهدف
+              continue;
             }
             throw new Error(data.error.message);
           }
@@ -626,6 +639,59 @@
         ST.sending.running=false; ST.sending.paused=false; savePersist();
         toast('انتهى الإرسال', `تم: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
       }
+    }
+
+    // ====== “بيانات الجمهور” (جديد)
+    function renderAudDataPage(){
+      const wrap = $('#audDataWrap');
+      const empty = $('#audDataEmpty');
+      wrap.innerHTML = '';
+      if(!ST.audiences.length){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+
+      ST.audiences.forEach(a=>{
+        const total = (a.userIds?.length||0);
+        const card = document.createElement('div');
+        card.className = 'glass p-4';
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <b>${a.name}</b>
+            <span class="badge">${total} مستخدم</span>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button class="px-3 py-1 bg-gray-700 text-white rounded" data-act="export">تصدير CSV</button>
+            <button class="px-3 py-1 bg-blue-600 text-white rounded" data-act="rename">إعادة تسمية</button>
+            <button class="px-3 py-1 bg-red-600 text-white rounded" data-act="delete">حذف</button>
+          </div>
+        `;
+        card.querySelector('[data-act="export"]').onclick = ()=> exportListCSV(a);
+        card.querySelector('[data-act="rename"]').onclick = ()=>{
+          const nn = prompt('اسم جديد:', a.name);
+          if(nn && nn.trim()){ a.name = nn.trim(); savePersist(); renderAudDataPage(); }
+        };
+        card.querySelector('[data-act="delete"]').onclick = ()=>{
+          if(confirm('حذف القائمة؟')){
+            ST.audiences = ST.audiences.filter(x=>x.id!==a.id);
+            savePersist(); renderAudDataPage();
+          }
+        };
+        wrap.appendChild(card);
+      });
+
+      $('#btnExportAllAud')?.addEventListener('click', ()=>{
+        const rows = [['list_name','id']];
+        ST.audiences.forEach(a=> (a.userIds||[]).forEach(id=> rows.push([a.name, id])));
+        downloadCSV(rows, 'audience_lists.csv');
+      });
+    }
+    function exportListCSV(a){
+      const rows = [['id']].concat((a.userIds||[]).map(id=>[id]));
+      downloadCSV(rows, (a.name||'audience')+'.csv');
+    }
+    function downloadCSV(rows, filename){
+      const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+      const a = document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
     }
 
     // ====== Reports
@@ -669,4 +735,3 @@
   </script>
 </body>
 </html>
- 
