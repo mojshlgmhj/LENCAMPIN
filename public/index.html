@@ -3,36 +3,62 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Linux Campaign — Local (No Firebase)</title>
+  <title>Linux Campaign — Pro</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;background:#eef3f7;color:#111827}
-    .glass{background:#fff;border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
-    .card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:12px}
-    .nav-item.active{background:#fff;color:#1e3a8a;box-shadow:0 1px 10px rgba(0,0,0,.06)}
-    .badge{display:inline-block;font-size:12px;padding:.2rem .6rem;border-radius:999px;background:#eef2ff;color:#1e3a8a}
+    :root{
+      --bg:#0b1020;             /* خلفية داكنة مريحة */
+      --card:rgba(255,255,255,.08);
+      --card-brd:rgba(255,255,255,.18);
+      --txt:#E6E9EF;
+      --muted:#AAB0BC;
+      --acc:#4F8BFF;            /* iOS blue */
+      --ok:#2ECC71; --warn:#F4BF4F; --err:#F25252;
+      --blur:18px;
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;background:radial-gradient(1200px 700px at 20% 0%, #16203F, var(--bg));
+      color:var(--txt);font:15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro", "Helvetica Neue", Arial;
+    }
+    .glass{background:var(--card);border:1px solid var(--card-brd);border-radius:var(--radius);
+      backdrop-filter:blur(var(--blur)) saturate(120%);-webkit-backdrop-filter:blur(var(--blur)) saturate(120%);
+      box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card{background:var(--card);border:1px solid var(--card-brd);border-radius:var(--radius);padding:14px}
+    .nav-item{color:var(--txt);opacity:.9}
+    .nav-item.active{background:rgba(255,255,255,.10)}
+    input,select,textarea{background:rgba(255,255,255,.06);color:var(--txt);border:1px solid var(--card-brd);border-radius:12px;padding:10px;outline:0}
+    .btn{border:1px solid var(--card-brd);background:rgba(255,255,255,.06);color:var(--txt);border-radius:12px;padding:9px 12px;cursor:pointer}
+    .btn.primary{background:linear-gradient(180deg,#5FA0FF,#4F8BFF);border-color:#5FA0FF;color:#081020}
+    .btn.warn{background:linear-gradient(180deg,#FFD86A,#F4BF4F);color:#1a1200}
+    .btn.danger{background:linear-gradient(180deg,#ff7d7d,#F25252);color:#1a0000}
+    .btn.success{background:linear-gradient(180deg,#6BE28E,#2ECC71);color:#00110a}
+    .badge{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12)}
     .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
     .inner-scroll{max-height:60vh;overflow-y:auto}
+    header{height:64px}
   </style>
 </head>
 <body>
 
   <!-- Login -->
-  <div id="loginOverlay" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50">
-    <div class="glass w-full max-w-md p-8 text-center">
-      <h1 class="text-3xl font-extrabold">Linux <span class="text-blue-600">Campaign</span></h1>
-      <p class="text-gray-600 mt-3">تسجيل دخول محلي (بدون Firebase)</p>
-      <div class="text-right mt-6 space-y-4">
+  <div id="loginOverlay" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div class="glass w-[min(92vw,420px)] p-6">
+      <h1 class="text-2xl font-extrabold text-center">Linux <span style="color:var(--acc)">Campaign</span></h1>
+      <p class="text-sm text-[var(--muted)] text-center mt-1" id="loginSubtitle">تسجيل دخول محلي (بدون Firebase)</p>
+      <div class="mt-5 space-y-3">
         <div>
-          <label class="text-sm font-medium">المستخدم</label>
-          <input id="adminUser" class="w-full mt-1 p-3 border rounded-lg" placeholder="admin">
+          <label class="text-sm" id="lblUser">المستخدم</label>
+          <input id="adminUser" class="w-full mt-1" placeholder="admin">
         </div>
         <div>
-          <label class="text-sm font-medium">كلمة المرور</label>
-          <input id="adminPass" type="password" class="w-full mt-1 p-3 border rounded-lg" placeholder="••••••••">
+          <label class="text-sm" id="lblPass">كلمة المرور</label>
+          <input id="adminPass" type="password" class="w-full mt-1" placeholder="••••••••">
         </div>
-        <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">دخول</button>
-        <p id="loginError" class="hidden text-red-600 text-sm">بيانات الدخول غير صحيحة.</p>
+        <button id="adminLoginBtn" class="btn primary w-full">دخول</button>
+        <p id="loginError" class="hidden text-red-300 text-sm">بيانات الدخول غير صحيحة.</p>
       </div>
     </div>
   </div>
@@ -40,68 +66,66 @@
   <!-- App -->
   <div id="app" class="hidden h-screen">
     <div class="h-full grid grid-cols-[260px_1fr]">
-      <aside class="glass p-4" id="sidebar">
-        <div class="h-16 flex items-center justify-center border-b">
-          <h2 class="font-extrabold text-xl">Linux <span class="text-blue-600">Campaign</span></h2>
+      <aside class="glass p-4">
+        <div class="h-16 flex items-center justify-center border-b border-[var(--card-brd)]">
+          <h2 class="font-extrabold text-xl">Linux <span style="color:var(--acc)">Campaign</span></h2>
         </div>
         <nav class="pt-4 space-y-2">
           <a href="#dashboard" id="navDashboard" class="nav-item block px-4 py-2 rounded-lg">لوحة المعلومات</a>
           <a href="#audience"  id="navAudience"  class="nav-item block px-4 py-2 rounded-lg">الجمهور</a>
           <a href="#content"   id="navContent"   class="nav-item block px-4 py-2 rounded-lg">المحتوى</a>
-
-          <!-- الجديد: تبويب بيانات الجمهور -->
           <a href="#auddata"   id="navAuddata"   class="nav-item block px-4 py-2 rounded-lg">بيانات الجمهور</a>
-
           <a href="#campaigns" id="navCampaigns" class="nav-item block px-4 py-2 rounded-lg">إنشاء حملة</a>
           <a href="#reports"   id="navReports"   class="nav-item block px-4 py-2 rounded-lg">التقارير</a>
         </nav>
-        <div class="pt-4 border-t mt-4">
+        <div class="pt-4 border-t border-[var(--card-brd)] mt-4">
           <a href="#settings" id="navSettings" class="nav-item block px-4 py-2 rounded-lg">الإعدادات</a>
         </div>
       </aside>
 
       <div class="flex flex-col">
-        <header class="glass h-16 px-6 flex items-center justify-between">
-          <h3 id="pageTitle" class="text-xl font-bold"></h3>
+        <header class="glass px-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span id="pageName" class="text-gray-600">غير متصل</span>
+            <h3 id="pageTitle" class="text-lg font-bold"></h3>
+            <span id="pageName" class="text-[var(--muted)]">غير متصل</span>
             <span id="statusDot" class="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="langLabel" class="badge">AR</span>
+            <button id="langToggle" class="btn">EN</button>
           </div>
         </header>
 
-        <div id="bannerDisconnected" class="hidden bg-yellow-100 border-y border-yellow-300 text-yellow-900 px-4 py-2">
+        <div id="bannerDisconnected" class="hidden px-4 py-2 text-yellow-200 bg-yellow-500/10 border-y border-yellow-500/30">
           غير متصل. أدخل Page ID و Access Token من الإعدادات.
         </div>
 
-        <main id="viewRoot" class="p-6 overflow-y-auto"></main>
+        <main id="viewRoot" class="p-4 overflow-y-auto"></main>
       </div>
     </div>
   </div>
 
-  <!-- Templates -->
+  <!-- TEMPLATES -->
   <template id="tpl-dashboard">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="card"><p class="text-gray-500">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
-      <div class="card"><p class="text-gray-500">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
-      <div class="card"><p class="text-gray-500">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card"><p class="text-[var(--muted)]">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card"><p class="text-[var(--muted)]">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card"><p class="text-[var(--muted)]">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
     </div>
   </template>
 
   <template id="tpl-audience">
     <div class="space-y-4">
-      <div class="glass p-4 grid md:grid-cols-2 gap-4 items-center">
+      <div class="glass p-4 grid md:grid-cols-2 gap-3 items-center">
         <div class="font-bold">مركز التحكم بالجمهور</div>
         <div class="flex flex-wrap gap-2 justify-end">
-          <button id="btnFetchStart"  class="px-3 py-2 bg-blue-600 text-white rounded">بدء السحب</button>
-          <button id="btnFetchPause"  class="px-3 py-2 bg-yellow-500 text-white rounded">إيقاف مؤقت</button>
-          <button id="btnFetchResume" class="px-3 py-2 bg-green-600 text-white rounded">استئناف</button>
-          <button id="btnFetchStop"   class="px-3 py-2 bg-red-600 text-white rounded">إيقاف نهائي</button>
-
-          <!-- الجديد: حفظ الجمهور المسحوب -->
-          <button id="btnSaveWhole"   class="px-3 py-2 bg-purple-600 text-white rounded">حفظ الجمهور المسحوب</button>
+          <button id="btnFetchStart"  class="btn primary">بدء السحب</button>
+          <button id="btnFetchPause"  class="btn warn">إيقاف مؤقت</button>
+          <button id="btnFetchResume" class="btn success">استئناف</button>
+          <button id="btnFetchStop"   class="btn danger">إيقاف نهائي</button>
+          <button id="btnSaveWhole"   class="btn" style="border-color:#a78bfa;background:linear-gradient(180deg,#c4b5fd,#a78bfa);color:#1a1033">حفظ الجمهور المسحوب</button>
         </div>
-
-        <div class="md:col-span-2 flex items-center gap-4 text-sm">
+        <div class="md:col-span-2 flex flex-wrap gap-3 text-sm">
           <span>المجموع: <b id="audCount">0</b></span>
           <span>المحدد: <b id="selCount">0</b></span>
           <span class="badge">الحالة: <b id="fetchState">متوقف</b></span>
@@ -111,26 +135,30 @@
       </div>
 
       <div class="glass p-3 flex flex-wrap gap-2 items-center">
-        <button id="btnSaveAud" class="px-3 py-2 bg-yellow-500 text-white rounded disabled:opacity-50">حفظ المحددين</button>
-        <button id="btnExportCSV" class="px-3 py-2 bg-gray-800 text-white rounded">تصدير CSV</button>
-        <button id="btnClearAll" class="px-3 py-2 bg-red-700 text-white rounded">حذف كل الجمهور</button>
+        <button id="btnSaveAud" class="btn warn">حفظ المحددين</button>
+        <button id="btnExportCSV" class="btn">تصدير CSV</button>
+        <button id="btnClearAll" class="btn danger">حذف كل الجمهور</button>
         <div class="ml-auto flex gap-2 items-center">
-          <input id="filterTxt" class="p-2 border rounded" placeholder="فلترة بالاسم أو ID">
-          <button id="btnApplyFilter" class="px-3 py-2 bg-gray-700 text-white rounded">فلترة</button>
-          <button id="btnResetFilter" class="px-3 py-2 bg-gray-500 text-white rounded">إلغاء</button>
+          <input id="filterTxt" class="w-48" placeholder="فلترة بالاسم أو ID">
+          <button id="btnApplyFilter" class="btn">فلترة</button>
+          <button id="btnResetFilter" class="btn">إلغاء</button>
         </div>
       </div>
 
       <div class="glass p-0">
-        <!-- الجديد: سكرول داخلي -->
         <div class="inner-scroll">
           <table class="w-full text-sm">
-            <thead class="bg-gray-50 sticky top-0 z-10">
-              <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
+            <thead class="sticky top-0 z-10">
+              <tr class="bg-white/10 backdrop-blur">
+                <th class="p-3 w-10 text-right"> </th>
+                <th class="p-3 text-right">المستخدم</th>
+                <th class="p-3 text-right">ID</th>
+              </tr>
             </thead>
-            <tbody id="audTable" class="divide-y"></tbody>
+            <tbody id="audTable"></tbody>
           </table>
         </div>
+        <div id="audPager" class="p-2 flex items-center justify-center gap-2 text-sm"></div>
       </div>
 
       <div class="glass p-4">
@@ -140,37 +168,36 @@
     </div>
   </template>
 
-  <!-- الجديد: تبويب بيانات الجمهور -->
   <template id="tpl-auddata">
     <div class="space-y-4">
       <div class="glass p-4 flex items-center justify-between">
         <div class="font-bold">قوائم “بيانات الجمهور”</div>
         <div class="flex gap-2">
-          <button id="btnExportAllAud" class="px-3 py-2 bg-gray-800 text-white rounded">تصدير كل القوائم CSV</button>
+          <button id="btnExportAllAud" class="btn">تصدير كل القوائم CSV</button>
         </div>
       </div>
       <div id="audDataWrap" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      <p id="audDataEmpty" class="hidden text-center text-gray-500">لا توجد قوائم محفوظة بعد.</p>
+      <p id="audDataEmpty" class="hidden text-center text-[var(--muted)]">لا توجد قوائم محفوظة بعد.</p>
     </div>
   </template>
 
   <template id="tpl-content">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="glass p-4">
-        <div class="font-bold mb-3">مكتبة الصور</div>
+        <div class="font-bold mb-2">مكتبة الصور</div>
         <div class="space-y-3">
-          <input id="imgName" class="w-full p-2 border rounded" placeholder="اسم الصورة" />
+          <input id="imgName" placeholder="اسم الصورة" />
           <input id="imgFile" type="file" accept="image/*" />
-          <button id="btnSaveImg" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ الصورة</button>
+          <button id="btnSaveImg" class="btn primary">حفظ الصورة</button>
         </div>
         <div id="imgList" class="mt-4 space-y-2"></div>
       </div>
       <div class="glass p-4">
-        <div class="font-bold mb-3">مكتبة النصوص</div>
+        <div class="font-bold mb-2">مكتبة النصوص</div>
         <div class="space-y-3">
-          <input id="capName" class="w-full p-2 border rounded" placeholder="اسم النص" />
-          <textarea id="capText" class="w-full p-2 border rounded h-28" placeholder="النص"></textarea>
-          <button id="btnSaveCap" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ النص</button>
+          <input id="capName" placeholder="اسم النص" />
+          <textarea id="capText" class="h-28" placeholder="النص"></textarea>
+          <button id="btnSaveCap" class="btn primary">حفظ النص</button>
         </div>
         <div id="capList" class="mt-4 space-y-2"></div>
       </div>
@@ -178,31 +205,31 @@
   </template>
 
   <template id="tpl-campaigns">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="glass p-4 space-y-4">
         <div>
           <label class="block text-sm font-medium">اختر جمهورك</label>
-          <select id="ddAudience" class="w-full p-2 border rounded"></select>
+          <select id="ddAudience" class="w-full"></select>
         </div>
         <div>
           <label class="block text-sm font-medium">الصورة</label>
-          <select id="ddImage" class="w-full p-2 border rounded"></select>
-          <input id="imgUrl" class="w-full p-2 border rounded mt-2" placeholder="أو أدخل رابط صورة"/>
+          <select id="ddImage" class="w-full"></select>
+          <input id="imgUrl" class="w-full mt-2" placeholder="أو أدخل رابط صورة"/>
         </div>
         <div>
           <label class="block text-sm font-medium">النص</label>
-          <select id="ddCaption" class="w-full p-2 border rounded"></select>
-          <textarea id="msgText" class="w-full p-2 border rounded mt-2 h-28" placeholder="أو اكتب رسالتك"></textarea>
+          <select id="ddCaption" class="w-full"></select>
+          <textarea id="msgText" class="w-full mt-2 h-28" placeholder="أو اكتب رسالتك"></textarea>
         </div>
-        <div class="flex flex-wrap items-end gap-3">
+        <div class="flex flex-wrap items-end gap-2">
           <div>
             <label class="block text-sm font-medium">الفاصل (ثانية)</label>
-            <input id="delay" type="number" value="5" min="1" class="w-28 p-2 border rounded" />
+            <input id="delay" type="number" value="0" min="0" class="w-28" />
           </div>
-          <button id="btnStart"  class="px-4 py-2 bg-blue-600 text-white rounded">بدء الإرسال</button>
-          <button id="btnPause"  class="px-4 py-2 bg-yellow-500 text-white rounded">إيقاف مؤقت</button>
-          <button id="btnResume" class="px-4 py-2 bg-green-600 text-white rounded">استئناف</button>
-          <button id="btnStop"   class="px-4 py-2 bg-red-600 text-white rounded">إيقاف نهائي</button>
+          <button id="btnStart"  class="btn primary">بدء الإرسال</button>
+          <button id="btnPause"  class="btn warn">إيقاف مؤقت</button>
+          <button id="btnResume" class="btn success">استئناف</button>
+          <button id="btnStop"   class="btn danger">إيقاف نهائي</button>
           <span class="ml-auto text-sm">التقدم: <b id="sendProg">0/0</b></span>
         </div>
       </div>
@@ -214,8 +241,8 @@
   </template>
 
   <template id="tpl-reports">
-    <div id="reportsWrap" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    <p id="noReports" class="hidden text-center text-gray-500 mt-8">لا توجد تقارير بعد.</p>
+    <div id="reportsWrap" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    <p id="noReports" class="hidden text-center text-[var(--muted)] mt-4">لا توجد تقارير بعد.</p>
   </template>
 
   <template id="tpl-settings">
@@ -223,17 +250,17 @@
       <div class="glass p-6">
         <div class="font-bold text-lg mb-3">إعدادات الاتصال</div>
         <div class="space-y-3">
-          <input id="pageId" class="w-full p-2 border rounded" placeholder="Page ID" />
-          <input id="accessToken" class="w-full p-2 border rounded" placeholder="Page Access Token" />
-          <button id="btnConnect" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ والاتصال</button>
+          <input id="pageId" class="w-full" placeholder="Page ID" />
+          <input id="accessToken" class="w-full" placeholder="Page Access Token" />
+          <button id="btnConnect" class="btn primary w-full">حفظ والاتصال</button>
         </div>
       </div>
       <div class="glass p-6">
         <div class="font-bold mb-2">جلسة المستخدم</div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
           <span>admin</span>
-          <button id="btnLogout" class="px-4 py-2 bg-gray-700 text-white rounded-lg">تسجيل الخروج</button>
-          <button id="btnClearCache" class="px-4 py-2 bg-red-700 text-white rounded-lg">تفريغ كل البيانات</button>
+          <button id="btnLogout" class="btn">تسجيل الخروج</button>
+          <button id="btnClearCache" class="btn danger">تفريغ كل البيانات</button>
         </div>
       </div>
     </div>
@@ -242,22 +269,22 @@
   <div id="modal" class="hidden fixed inset-0 bg-black/50 z-[60] items-center justify-center">
     <div class="glass p-6 max-w-md w-full">
       <h4 id="mTitle" class="font-bold text-lg mb-2"></h4>
-      <p id="mMsg" class="text-gray-700 whitespace-pre-wrap"></p>
-      <div class="text-left mt-4"><button id="mOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حسنًا</button></div>
+      <p id="mMsg" class="whitespace-pre-wrap"></p>
+      <div class="text-left mt-4"><button id="mOk" class="btn primary">حسنًا</button></div>
     </div>
   </div>
 
   <script>
-    // ====== Local state (no Firebase)
+    // ====== Local state
     const LS = {
-      get: (k, d) => { try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch{ return d } },
-      set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
-      del: (k) => localStorage.removeItem(k)
+      get:(k,d)=>{ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch{ return d } },
+      set:(k,v)=> localStorage.setItem(k, JSON.stringify(v)),
+      del:(k)=> localStorage.removeItem(k)
     };
     const ST = {
-      connected: false,
+      connected:false,
       pageId: LS.get('lc_pageId', null),
-      token:  LS.get('lc_token', null),
+      token:  LS.get('lc_token',  null),
 
       users:  LS.get('lc_users', []),          // [{id,name,picture}]
       audiences: LS.get('lc_audiences', []),   // [{id,name,userIds:[]}]
@@ -267,22 +294,8 @@
       fetching: LS.get('lc_fetching', {running:false, paused:false, next:null, page:0}),
       fetchAdded: 0,
 
-      sending: LS.get('lc_sending', {running:false, paused:false, idx:0, targets:[], job:null, delay:5})
+      sending: LS.get('lc_sending', {running:false, paused:false, idx:0, targets:[], job:null, delay:0})
     };
-
-    // ====== Helpers/UI
-    const $  = (s, p=document) => p.querySelector(s);
-    const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
-    function toast(title, msg){
-      $('#mTitle').textContent = title; $('#mMsg').textContent = msg||'';
-      $('#modal').classList.remove('hidden'); $('#mOk').onclick = ()=>$('#modal').classList.add('hidden');
-    }
-    function setConnectedUI(yes, name){
-      $('#pageName').textContent = yes ? (name||'متصل') : 'غير متصل';
-      $('#statusDot').classList.toggle('bg-green-500', yes);
-      $('#statusDot').classList.toggle('bg-red-500', !yes);
-      $('#bannerDisconnected').classList.toggle('hidden', yes);
-    }
     function savePersist(){
       LS.set('lc_users', ST.users);
       LS.set('lc_audiences', ST.audiences);
@@ -292,446 +305,389 @@
       LS.set('lc_sending', ST.sending);
     }
 
-    // ====== Login (local only)
+    const $=(s,p=document)=>p.querySelector(s);
+    const $$=(s,p=document)=>Array.from(p.querySelectorAll(s));
+    function toast(title, msg){ $('#mTitle').textContent=title; $('#mMsg').textContent=msg||''; $('#modal').classList.remove('hidden'); $('#mOk').onclick=()=>$('#modal').classList.add('hidden'); }
+    function setConnectedUI(yes, name){ $('#pageName').textContent = yes?(name||'متصل'):'غير متصل'; $('#statusDot').classList.toggle('bg-green-500', yes); $('#statusDot').classList.toggle('bg-red-500', !yes); $('#bannerDisconnected').classList.toggle('hidden', yes); }
+
+    // ====== i18n (AR/EN)
+    const I18N = {
+      ar:{dash:"لوحة المعلومات",aud:"الجمهور",cont:"المحتوى",auddata:"بيانات الجمهور",camp:"إنشاء حملة",rep:"التقارير",set:"الإعدادات",
+          saveAll:"حفظ الجمهور المسحوب",noAud:"لا يوجد جمهور",askList:"اسم قائمة الجمهور:",savedAll:"تم حفظ كل الجمهور ضمن “بيانات الجمهور”.",
+          start:"بدء السحب",pause:"إيقاف مؤقت",resume:"استئناف",stop:"إيقاف نهائي",
+          state:"الحالة",page:"الصفحة الحالية",added:"المضاف حديثًا",loginHint:"تسجيل دخول محلي (بدون Firebase)",user:"المستخدم",pass:"كلمة المرور",ok:"حسنًا"},
+      en:{dash:"Dashboard",aud:"Audience",cont:"Content",auddata:"Saved Audiences",camp:"Campaigns",rep:"Reports",set:"Settings",
+          saveAll:"Save current audience",noAud:"No audience yet",askList:"List name:",savedAll:"Saved to “Saved Audiences”.",
+          start:"Start",pause:"Pause",resume:"Resume",stop:"Stop",
+          state:"State",page:"Page",added:"Added",loginHint:"Local login (no Firebase)",user:"Username",pass:"Password",ok:"OK"}
+    };
+    function setLang(lang){
+      const L=I18N[lang]||I18N.ar;
+      localStorage.setItem('lc_lang', lang);
+      document.documentElement.lang=(lang==='en'?'en':'ar');
+      document.documentElement.dir=(lang==='en'?'ltr':'rtl');
+      $('#navDashboard').textContent=L.dash;
+      $('#navAudience').textContent=L.aud;
+      $('#navContent').textContent=L.cont;
+      $('#navAuddata').textContent=L.auddata;
+      $('#navCampaigns').textContent=L.camp;
+      $('#navReports').textContent=L.rep;
+      $('#navSettings').textContent=L.set;
+      $('#lblUser')?.textContent=L.user;
+      $('#lblPass')?.textContent=L.pass;
+      $('#loginSubtitle')?.textContent=L.loginHint;
+      $('#langLabel').textContent=(lang==='en'?'EN':'AR');
+      $('#langToggle').textContent=(lang==='en'?'AR':'EN');
+      $('#mOk')?.textContent=L.ok;
+      // badges dynamic in audience view handled by render()
+    }
+    $('#langToggle')?.addEventListener('click',()=>{ const lang=localStorage.getItem('lc_lang')==='en'?'ar':'en'; setLang(lang); render(); });
+    setLang(localStorage.getItem('lc_lang')||'ar');
+
+    // ====== Login
     function doLogin(){
-      const u = $('#adminUser').value.trim();
-      const p = $('#adminPass').value.trim();
-      if(u==='admin' && p==='mO..012842'){
-        localStorage.setItem('lc_logged','1');
-        $('#loginOverlay').classList.add('hidden');
-        $('#app').classList.remove('hidden');
-        initAfterLogin();
-      }else{
-        $('#loginError').classList.remove('hidden');
-      }
+      const u=$('#adminUser').value.trim(), p=$('#adminPass').value.trim();
+      if(u==='admin' && p==='mO..012842'){ localStorage.setItem('lc_logged','1'); $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); initAfterLogin(); }
+      else $('#loginError').classList.remove('hidden');
     }
 
-    // ====== Router/Views
-    const views = {
+    // ====== Views
+    const views={
       dashboard(root){
-        root.innerHTML = $('#tpl-dashboard').innerHTML;
-        $('#statTotal').textContent = ST.users.length;
-        const sent = (LS.get('lc_reports', [])).reduce((a,c)=>a+(c.successCount||0),0);
-        const tot  = (LS.get('lc_reports', [])).reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
-        $('#statSent').textContent = sent;
-        $('#statRate').textContent = tot? Math.round((sent/tot)*100)+'%':'0%';
+        root.innerHTML=$('#tpl-dashboard').innerHTML;
+        $('#statTotal').textContent=ST.users.length;
+        const reports=LS.get('lc_reports',[]), sent=reports.reduce((a,c)=>a+(c.successCount||0),0), tot=reports.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
+        $('#statSent').textContent=sent; $('#statRate').textContent=tot?Math.round((sent/tot)*100)+'%':'0%';
       },
       audience(root){
-        root.innerHTML = $('#tpl-audience').innerHTML;
-        bindAudienceUI();
-        renderAudienceTable();
-        renderSavedAudiences();
-        updateFetchBadges();
+        root.innerHTML=$('#tpl-audience').innerHTML;
+        bindAudienceUI(); renderAudienceTable(); renderSavedAudiences(); updateFetchBadges();
+        // localize buttons/badges
+        const lang=localStorage.getItem('lc_lang')||'ar', L=I18N[lang];
+        $('#btnFetchStart').textContent=L.start; $('#btnFetchPause').textContent=L.pause; $('#btnFetchResume').textContent=L.resume; $('#btnFetchStop').textContent=L.stop; $('#btnSaveWhole').textContent=L.saveAll;
+        $('#fetchState').previousSibling.textContent = `${L.state}: `;
+        $('#fetchPage').previousSibling.textContent  = `${L.page}: `;
+        $('#fetchAdded').previousSibling.textContent = `${L.added}: `;
       },
-      /* الجديد: تبويب بيانات الجمهور */
       auddata(root){
-        root.innerHTML = $('#tpl-auddata').innerHTML;
+        root.innerHTML=$('#tpl-auddata').innerHTML;
         renderAudDataPage();
       },
       content(root){
-        root.innerHTML = $('#tpl-content').innerHTML;
-        $('#btnSaveImg').onclick = saveImage;
-        $('#btnSaveCap').onclick = saveCaption;
-        renderImgs(); renderCaps();
+        root.innerHTML=$('#tpl-content').innerHTML;
+        $('#btnSaveImg').onclick=saveImage; $('#btnSaveCap').onclick=saveCaption; renderImgs(); renderCaps();
       },
       campaigns(root){
-        root.innerHTML = $('#tpl-campaigns').innerHTML;
-        fillCampaignDropdowns();
-        bindCampaignControls();
-        updateSendProgress();
+        root.innerHTML=$('#tpl-campaigns').innerHTML;
+        fillCampaignDropdowns(); bindCampaignControls(); updateSendProgress();
       },
       reports(root){
-        root.innerHTML = $('#tpl-reports').innerHTML;
-        renderReports();
+        root.innerHTML=$('#tpl-reports').innerHTML; renderReports();
       },
       settings(root){
-        root.innerHTML = $('#tpl-settings').innerHTML;
-        $('#pageId').value     = ST.pageId || '';
-        $('#accessToken').value= ST.token  || '';
-        $('#btnConnect').onclick = () => connect($('#pageId').value.trim(), $('#accessToken').value.trim());
-        $('#btnLogout').onclick  = () => { localStorage.removeItem('lc_logged'); location.reload(); };
-        $('#btnClearCache').onclick = () => { if(confirm('تفريغ كل البيانات المحلية؟')){ localStorage.clear(); location.reload(); } };
+        root.innerHTML=$('#tpl-settings').innerHTML;
+        $('#pageId').value=ST.pageId||''; $('#accessToken').value=ST.token||'';
+        $('#btnConnect').onclick=()=>connect($('#pageId').value.trim(), $('#accessToken').value.trim());
+        $('#btnLogout').onclick =()=>{ localStorage.removeItem('lc_logged'); location.reload(); };
+        $('#btnClearCache').onclick=()=>{ if(confirm('تفريغ كل البيانات المحلية؟')){ localStorage.clear(); location.reload(); } };
       }
     };
-
     function render(){
-      const v = (location.hash||'#dashboard').slice(1);
-      $$('.nav-item').forEach(a=>a.classList.remove('active'));
-      $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');
-      $('#pageTitle').textContent = $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent || '';
+      const v=(location.hash||'#dashboard').slice(1);
+      $$('.nav-item').forEach(a=>a.classList.remove('active')); $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');
+      $('#pageTitle').textContent=$('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent||'';
       views[v]?.($('#viewRoot'));
     }
-    window.addEventListener('hashchange', render);
+    window.addEventListener('hashchange',render);
 
-    // ====== Connect to Graph
+    // ====== Connect (Graph)
     async function connect(pageId, token){
-      if(!pageId || !token) return toast('خطأ','أدخل Page ID و Access Token');
+      if(!pageId||!token) return toast('خطأ','أدخل Page ID و Access Token');
       try{
-        const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name,picture.type(small)&access_token=${encodeURIComponent(token)}`);
-        const data = await res.json();
-        if(!res.ok || data.error) throw new Error(data.error?.message || ('HTTP '+res.status));
-        ST.pageId = pageId; ST.token = token; ST.connected = true;
-        LS.set('lc_pageId', pageId); LS.set('lc_token', token);
-        setConnectedUI(true, data.name);
-        toast('تم الاتصال', `متصل الآن بصفحة ${data.name}`);
-      }catch(e){
-        setConnectedUI(false);
-        toast('فشل الاتصال', e.message);
-      }
+        const res=await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name,picture.type(small)&access_token=${encodeURIComponent(token)}`);
+        const data=await res.json();
+        if(!res.ok||data.error) throw new Error(data.error?.message||('HTTP '+res.status));
+        ST.pageId=pageId; ST.token=token; ST.connected=true; LS.set('lc_pageId',pageId); LS.set('lc_token',token);
+        setConnectedUI(true,data.name); toast('تم الاتصال',`متصل الآن بصفحة ${data.name}`);
+      }catch(e){ setConnectedUI(false); toast('فشل الاتصال',e.message); }
     }
 
-    // ====== Audience (fetch / save / export)
+    // ====== Audience (UI/FETCH/EXPORT)
+    $('#adminLoginBtn').onclick=doLogin; $('#adminPass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
     function bindAudienceUI(){
-      $('#btnFetchStart').onclick = fetchStart;
-      $('#btnFetchPause').onclick = fetchPause;
-      $('#btnFetchResume').onclick= fetchResume;
-      $('#btnFetchStop').onclick  = fetchStop;
-
-      $('#btnSaveAud').onclick    = saveSelectedAudience;
-      $('#btnExportCSV').onclick  = exportCSV;
-      $('#btnClearAll').onclick   = () => { if(confirm('حذف كل الجمهور؟')){ ST.users = []; savePersist(); renderAudienceTable(); } };
-
-      $('#btnApplyFilter').onclick= applyFilter;
-      $('#btnResetFilter').onclick= ()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
-
-      // الجديد: حفظ كل الجمهور الحالي
-      const btnWhole = $('#btnSaveWhole');
-      if(btnWhole) btnWhole.onclick = saveWholeAudience;
+      $('#btnFetchStart').onclick=fetchStart; $('#btnFetchPause').onclick=fetchPause; $('#btnFetchResume').onclick=fetchResume; $('#btnFetchStop').onclick=fetchStop;
+      $('#btnSaveAud').onclick=saveSelectedAudience; $('#btnExportCSV').onclick=exportCSV; $('#btnClearAll').onclick=()=>{ if(confirm('حذف كل الجمهور؟')){ ST.users=[]; savePersist(); renderAudienceTable(); } };
+      $('#btnApplyFilter').onclick=applyFilter; $('#btnResetFilter').onclick=()=>{ $('#filterTxt').value=''; renderAudienceTable(); };
+      $('#btnSaveWhole').onclick=saveWholeAudience;
     }
     function updateFetchBadges(){
-      $('#audCount').textContent = ST.users.length;
-      $('#selCount').textContent = ST._selectedCount || 0;
-      $('#fetchState').textContent= ST.fetching.running ? (ST.fetching.paused ? 'متوقف مؤقتًا' : 'يعمل') : 'متوقف';
-      $('#fetchPage').textContent = ST.fetching.page || '—';
-      $('#fetchAdded').textContent= ST.fetchAdded || 0;
+      $('#audCount').textContent=ST.users.length;
+      $('#selCount').textContent=ST._selectedCount||0;
+      $('#fetchState').textContent=ST.fetching.running?(ST.fetching.paused?'متوقف مؤقتًا':'يعمل'):'متوقف';
+      $('#fetchPage').textContent=ST.fetching.page||'—';
+      $('#fetchAdded').textContent=ST.fetchAdded||0;
     }
+    let AUD_PAGE=1, AUD_SIZE=100;
     function renderAudienceTable(filter=''){
-      const body = $('#audTable'); body.innerHTML='';
-      const rows = (filter? ST.users.filter(u => (u.name||'').includes(filter) || (u.id||'').includes(filter)) : ST.users);
-      rows.forEach(u=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="p-2"><input type="checkbox" data-id="${u.id}"></td>
-                        <td class="p-2"><div class="flex items-center gap-2">
-                          <img src="${u.picture||'https://placehold.co/40'}" class="w-8 h-8 rounded"/><b>${u.name||'User'}</b></div></td>
-                        <td class="p-2 mono text-gray-700">${u.id}</td>`;
+      const body=$('#audTable'); body.innerHTML='';
+      let rows=ST.users; if(filter){ rows=rows.filter(u=> (u.name||'').includes(filter) || (u.id||'').includes(filter)); }
+      const totalPages=Math.max(1, Math.ceil(rows.length/AUD_SIZE)); if(AUD_PAGE>totalPages) AUD_PAGE=totalPages;
+      const slice=rows.slice((AUD_PAGE-1)*AUD_SIZE, AUD_PAGE*AUD_SIZE);
+      slice.forEach(u=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=`<td class="p-2"><input type="checkbox" data-id="${u.id}"></td>
+                      <td class="p-2"><div class="flex items-center gap-2">
+                        <img src="${u.picture||'https://placehold.co/40'}" class="w-8 h-8 rounded"/><b>${u.name||'User'}</b></div></td>
+                      <td class="p-2 mono">${u.id}</td>`;
         body.appendChild(tr);
       });
-      body.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.onchange = (e)=>{
-        const id = e.target.dataset.id;
-        if(!ST._selected) ST._selected = new Set();
-        if(e.target.checked) ST._selected.add(id); else ST._selected.delete(id);
-        ST._selectedCount = ST._selected.size;
-        updateFetchBadges();
+      body.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.onchange=(e)=>{
+        const id=e.target.dataset.id; if(!ST._selected) ST._selected=new Set(); if(e.target.checked) ST._selected.add(id); else ST._selected.delete(id);
+        ST._selectedCount=ST._selected.size; updateFetchBadges();
       });
-      updateFetchBadges();
+      const pager=$('#audPager');
+      pager.innerHTML=`
+        <button class="btn" ${AUD_PAGE<=1?'disabled':''} id="pgPrev">‹</button>
+        <span class="badge">${AUD_PAGE} / ${totalPages}</span>
+        <button class="btn" ${AUD_PAGE>=totalPages?'disabled':''} id="pgNext">›</button>
+      `;
+      pager.querySelector('#pgPrev')?.addEventListener('click',()=>{ if(AUD_PAGE>1){ AUD_PAGE--; renderAudienceTable($('#filterTxt').value.trim()); }});
+      pager.querySelector('#pgNext')?.addEventListener('click',()=>{ if(AUD_PAGE<totalPages){ AUD_PAGE++; renderAudienceTable($('#filterTxt').value.trim()); }});
+      $('#audCount').textContent=ST.users.length; $('#selCount').textContent=ST._selectedCount||0;
     }
     function applyFilter(){ renderAudienceTable($('#filterTxt').value.trim()); }
     function exportCSV(){
-      const rows = [['id','name','picture']].concat(ST.users.map(u=>[u.id||'', u.name||'', u.picture||'']));
-      const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
-      const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-      const a = document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url);
+      const rows=[['id','name','picture']].concat(ST.users.map(u=>[u.id||'',u.name||'',u.picture||'']));
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download='audience.csv'; a.click(); URL.revokeObjectURL(url);
     }
     function saveWholeAudience(){
       if(!ST.users.length) return toast('لا يوجد جمهور','اسحب الجمهور أولًا.');
-      const name = prompt('اسم قائمة الجمهور:');
-      if(!name) return;
-      const ids = ST.users.map(u=> u.id).filter(Boolean);
-      ST.audiences.push({id: crypto.randomUUID(), name: name.trim(), userIds: ids});
-      savePersist();
-      toast('تم','تم حفظ كل الجمهور ضمن “بيانات الجمهور”.');
-      renderSavedAudiences?.();
+      const lang=localStorage.getItem('lc_lang')||'ar', L=I18N[lang];
+      const name=prompt(L.askList); if(!name) return;
+      const ids=ST.users.map(u=>u.id).filter(Boolean);
+      ST.audiences.push({id:crypto.randomUUID(), name:name.trim(), userIds:ids});
+      savePersist(); toast('تم', L.savedAll); renderSavedAudiences?.();
     }
 
     async function fetchLoop(){
-      let backoff = 2;
+      let backoff=800;
       while(ST.fetching.running && !ST.fetching.paused && ST.fetching.next){
         try{
-          const res = await fetch(ST.fetching.next);
-          const data = await res.json();
+          const res=await fetch(ST.fetching.next);
+          const data=await res.json();
           if(data.error){
-            if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
-              await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
-              continue;
-            }
+            const code=String(data.error.code||'');
+            if(code.includes('613')||code.includes('4')){ await new Promise(r=>setTimeout(r, backoff)); backoff=Math.min(backoff*1.8, 60000); continue; }
             throw new Error(data.error.message);
           }
-          backoff = 2;
-          const seen = new Set(ST.users.map(u=>u.id));
+          backoff=800;
+          const seen=new Set(ST.users.map(u=>u.id));
           (data.data||[]).forEach(conv=>{
-            const u = (conv.participants?.data||[]).find(p=>p.id!==ST.pageId);
-            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id, name:u.name, picture:u.picture?.data?.url}); ST.fetchAdded++; }
+            const u=(conv.participants?.data||[]).find(p=>p.id!==ST.pageId);
+            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id,name:u.name,picture:u.picture?.data?.url}); ST.fetchAdded++; }
           });
-          ST.fetching.next = data.paging?.next || null;
-          ST.fetching.page = (ST.fetching.page||0)+1;
-          savePersist();
-          renderAudienceTable($('#filterTxt')?.value||'');
-          updateFetchBadges();
-          await new Promise(r=>setTimeout(r, 800));
-          if(!ST.fetching.next) { ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('انتهى السحب','لا مزيد من الصفحات.'); }
-        }catch(e){
-          ST.fetching.running=false; savePersist(); updateFetchBadges();
-          toast('خطأ في السحب', e.message||String(e));
-        }
+          ST.fetching.next=data.paging?.next||null; ST.fetching.page=(ST.fetching.page||0)+1; savePersist();
+          renderAudienceTable($('#filterTxt')?.value||''); updateFetchBadges();
+          await new Promise(r=>setTimeout(r, 500));
+          if(!ST.fetching.next){ ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('انتهى السحب','لا مزيد من الصفحات.'); }
+        }catch(e){ ST.fetching.running=false; savePersist(); updateFetchBadges(); toast('خطأ في السحب', e.message||String(e)); }
       }
     }
-    function fetchStart(){
-      if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
+    function fetchStart(){ if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
       ST.fetching.running=true; ST.fetching.paused=false;
-      ST.fetching.next = `https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
-      ST.fetching.page=0; ST.fetchAdded=0;
-      savePersist(); updateFetchBadges(); fetchLoop();
+      ST.fetching.next=`https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
+      ST.fetching.page=0; ST.fetchAdded=0; savePersist(); updateFetchBadges(); fetchLoop();
     }
     function fetchPause(){ if(ST.fetching.running){ ST.fetching.paused=true; savePersist(); updateFetchBadges(); } }
     function fetchResume(){ if(ST.fetching.next){ ST.fetching.paused=false; ST.fetching.running=true; savePersist(); updateFetchBadges(); fetchLoop(); } }
     function fetchStop(){ ST.fetching.running=false; ST.fetching.paused=false; savePersist(); updateFetchBadges(); }
 
     function renderSavedAudiences(){
-      const box = $('#audSaved'); if(!box) return; box.innerHTML='';
+      const box=$('#audSaved'); if(!box) return; box.innerHTML='';
       ST.audiences.forEach(a=>{
-        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
-        row.innerHTML = `<div><b>${a.name}</b> <span class="text-gray-500 text-sm">(${a.userIds.length})</span></div>
-                         <button class="text-red-600" data-id="${a.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.audiences = ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); };
+        const row=document.createElement('div'); row.className='flex items-center justify-between py-1';
+        row.innerHTML=`<div><b>${a.name}</b> <span class="text-[var(--muted)] text-sm">(${a.userIds.length})</span></div>
+                       <button class="btn danger" data-id="${a.id}">حذف</button>`;
+        row.querySelector('button').onclick=()=>{ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderSavedAudiences(); };
         box.appendChild(row);
       });
     }
     function saveSelectedAudience(){
-      const ids = ST._selected ? Array.from(ST._selected) : [];
-      if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
-      const name = prompt('اسم القائمة:'); if(!name) return;
-      ST.audiences.push({id: crypto.randomUUID(), name, userIds: ids});
-      savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges();
-      toast('تم','تم حفظ القائمة.');
+      const ids=ST._selected?Array.from(ST._selected):[]; if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
+      const lang=localStorage.getItem('lc_lang')||'ar', L=I18N[lang];
+      const name=prompt(L.askList); if(!name) return;
+      ST.audiences.push({id:crypto.randomUUID(), name, userIds:ids}); savePersist(); renderSavedAudiences(); ST._selected?.clear(); ST._selectedCount=0; updateFetchBadges(); toast('تم', L.savedAll);
     }
 
-    // ====== Content (localStorage)
-    function renderImgs(){
-      const list = $('#imgList'); list.innerHTML='';
-      ST.images.forEach(img=>{
-        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
-        row.innerHTML = `<div class="flex items-center gap-2">
-            <img src="${img.url}" class="w-10 h-10 rounded object-cover"><b>${img.name}</b></div>
-          <button class="text-red-600" data-id="${img.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.images = ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); };
-        list.appendChild(row);
-      });
-    }
-    function renderCaps(){
-      const list = $('#capList'); list.innerHTML='';
-      ST.captions.forEach(c=>{
-        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
-        row.innerHTML = `<div><b>${c.name}</b><div class="text-gray-500 text-sm max-w-sm truncate">${c.text}</div></div>
-          <button class="text-red-600" data-id="${c.id}">حذف</button>`;
-        row.querySelector('button').onclick = ()=>{ ST.captions = ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); };
-        list.appendChild(row);
-      });
-    }
+    // ====== Content
+    function renderImgs(){ const list=$('#imgList'); list.innerHTML=''; ST.images.forEach(img=>{
+      const row=document.createElement('div'); row.className='flex items-center justify-between py-1';
+      row.innerHTML=`<div class="flex items-center gap-2"><img src="${img.url}" class="w-10 h-10 rounded object-cover"><b>${img.name}</b></div>
+                     <button class="btn danger" data-id="${img.id}">حذف</button>`;
+      row.querySelector('button').onclick=()=>{ ST.images=ST.images.filter(x=>x.id!==img.id); savePersist(); renderImgs(); };
+      list.appendChild(row);
+    }); }
+    function renderCaps(){ const list=$('#capList'); list.innerHTML=''; ST.captions.forEach(c=>{
+      const row=document.createElement('div'); row.className='flex items-center justify-between py-1';
+      row.innerHTML=`<div><b>${c.name}</b><div class="text-[var(--muted)] text-sm max-w-sm truncate">${c.text}</div></div>
+                     <button class="btn danger" data-id="${c.id}">حذف</button>`;
+      row.querySelector('button').onclick=()=>{ ST.captions=ST.captions.filter(x=>x.id!==c.id); savePersist(); renderCaps(); };
+      list.appendChild(row);
+    }); }
     function saveImage(){
-      const name = $('#imgName').value.trim();
-      const file = $('#imgFile').files[0];
-      if(!name || !file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        ST.images.push({id: crypto.randomUUID(), name, url: reader.result});
-        savePersist(); renderImgs();
-        $('#imgName').value=''; $('#imgFile').value='';
-      };
+      const name=$('#imgName').value.trim(), file=$('#imgFile').files[0]; if(!name||!file) return;
+      const reader=new FileReader(); reader.onload=()=>{ ST.images.push({id:crypto.randomUUID(), name, url:reader.result}); savePersist(); renderImgs(); $('#imgName').value=''; $('#imgFile').value=''; };
       reader.readAsDataURL(file);
     }
-    function saveCaption(){
-      const name = $('#capName').value.trim();
-      const text = $('#capText').value.trim();
-      if(!name || !text) return;
-      ST.captions.push({id: crypto.randomUUID(), name, text});
-      savePersist(); renderCaps();
-      $('#capName').value=''; $('#capText').value='';
+    function saveCaption(){ const name=$('#capName').value.trim(), text=$('#capText').value.trim(); if(!name||!text) return;
+      ST.captions.push({id:crypto.randomUUID(), name, text}); savePersist(); renderCaps(); $('#capName').value=''; $('#capText').value='';
     }
 
-    // ====== Campaigns
+    // ====== Campaigns (PRO Sender)
     function fillCampaignDropdowns(){
-      const ddA = $('#ddAudience'); ddA.innerHTML = `<option value="">-- اختر جمهورًا --</option>`;
+      const ddA=$('#ddAudience'); ddA.innerHTML=`<option value="">-- اختر جمهورًا --</option>`;
       ST.audiences.forEach(a=> ddA.add(new Option(`${a.name} (${a.userIds.length})`, a.id)));
-      const ddI = $('#ddImage'); ddI.innerHTML = `<option value="">-- اختر صورة --</option>`;
-      ST.images.forEach(img=> ddI.add(new Option(img.name, img.id)));
-      ddI.onchange = ()=>{ const img = ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value = img.url; };
-      const ddC = $('#ddCaption'); ddC.innerHTML = `<option value="">-- اختر نصًا --</option>`;
-      ST.captions.forEach(c=> ddC.add(new Option(c.name, c.id)));
-      ddC.onchange = ()=>{ const c = ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value = c.text; };
+      const ddI=$('#ddImage'); ddI.innerHTML=`<option value="">-- اختر صورة --</option>`; ST.images.forEach(img=> ddI.add(new Option(img.name, img.id)));
+      ddI.onchange=()=>{ const img=ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value=img.url; };
+      const ddC=$('#ddCaption'); ddC.innerHTML=`<option value="">-- اختر نصًا --</option>`; ST.captions.forEach(c=> ddC.add(new Option(c.name, c.id)));
+      ddC.onchange=()=>{ const c=ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value=c.text; };
       renderSendList([]);
     }
-    function renderSendList(ids){
-      $('#sendList').innerHTML='';
-      ids.forEach(id=>{
-        const div = document.createElement('div'); div.className='flex items-center justify-between p-2 border rounded';
-        const u = ST.users.find(x=>x.id===id) || {name:'User', picture:'https://placehold.co/40'};
-        div.innerHTML = `<div class="flex items-center gap-2"><img class="w-8 h-8 rounded" src="${u.picture}"><b>${u.name}</b></div>
-                         <span id="st-${id}" class="text-sm text-gray-500">—</span>`;
-        $('#sendList').appendChild(div);
-      });
-      $('#targetCount').textContent = ids.length;
+    function renderSendList(ids){ $('#sendList').innerHTML=''; ids.forEach(id=>{
+      const div=document.createElement('div'); div.className='flex items-center justify-between p-2 border border-[var(--card-brd)] rounded';
+      const u=ST.users.find(x=>x.id===id)||{name:'User',picture:'https://placehold.co/40'};
+      div.innerHTML=`<div class="flex items-center gap-2"><img class="w-8 h-8 rounded" src="${u.picture}"><b>${u.name}</b></div>
+                     <span id="st-${id}" class="text-sm text-[var(--muted)]">—</span>`;
+      $('#sendList').appendChild(div);
+    }); $('#targetCount').textContent=ids.length; }
+    function bindCampaignControls(){ $('#btnStart').onclick=startCampaign; $('#btnPause').onclick=()=>{ ST.sending.paused=true; savePersist(); }; $('#btnResume').onclick=()=>{ ST.sending.paused=false; savePersist(); runSender(); }; $('#btnStop').onclick=()=>{ ST.sending.running=false; ST.sending.paused=false; savePersist(); updateSendProgress(); }; }
+    function updateSendProgress(){ $('#sendProg').textContent=`${ST.sending.idx}/${ST.sending.targets.length}`; }
+
+    // منع التكرار (سجل دائم لكل صفحة)
+    const SENT_LOG = LS.get('lc_sent_log', {}); // { pageId : { recipientId : ts } }
+    function markSent(id){ if(!SENT_LOG[ST.pageId]) SENT_LOG[ST.pageId]={}; SENT_LOG[ST.pageId][id]=Date.now(); LS.set('lc_sent_log', SENT_LOG); }
+    function wasSent(id){ return !!(SENT_LOG[ST.pageId] && SENT_LOG[ST.pageId][id]); }
+
+    // Rate limiter (Token Bucket)
+    const RATE={ perMinute:120 }; // عدّلها حسب سياساتك
+    let tokens=RATE.perMinute, lastRefill=Date.now();
+    function takeToken(){
+      const now=Date.now(), delta=now-lastRefill, refill=Math.floor(delta/1000)*(RATE.perMinute/60);
+      if(refill>0){ tokens=Math.min(RATE.perMinute, tokens+refill); lastRefill=now; }
+      if(tokens>0){ tokens--; return true; } return false;
     }
-    function bindCampaignControls(){
-      $('#btnStart').onclick = startCampaign;
-      $('#btnPause').onclick = ()=>{ ST.sending.paused=true; savePersist(); };
-      $('#btnResume').onclick= ()=>{ ST.sending.paused=false; savePersist(); runSender(); };
-      $('#btnStop').onclick  = ()=>{ ST.sending.running=false; ST.sending.paused=false; savePersist(); updateSendProgress(); };
-    }
-    function updateSendProgress(){
-      $('#sendProg').textContent = `${ST.sending.idx}/${ST.sending.targets.length}`;
-    }
+    const sleep=ms=>new Promise(r=>setTimeout(r,ms)); const jitter=ms=> ms + Math.floor(Math.random()*250);
+
     async function startCampaign(){
       if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
-      const audId = $('#ddAudience').value;
-      const audience = ST.audiences.find(a=>a.id===audId);
-      if(!audience || audience.userIds.length===0) return toast('خطأ','اختر جمهورًا صحيحًا.');
-      const message = $('#msgText').value.trim();
-      const imageUrl = $('#imgUrl').value.trim();
-      if(!message && !imageUrl) return toast('خطأ','أدخل رسالة أو صورة.');
-      const delay = Math.max(1, parseInt($('#delay').value||'5',10));
-
-      ST.sending = {running:true, paused:false, idx:0, targets:[...audience.userIds], job:{
-        id: crypto.randomUUID(), name:`Campaign ${new Date().toLocaleString()}`, createdAt: Date.now(), successCount:0, failureCount:0
-      }, delay};
-      savePersist();
-
-      renderSendList(ST.sending.targets);
-      runSender(message, imageUrl, delay);
+      const audId=$('#ddAudience').value, audience=ST.audiences.find(a=>a.id===audId);
+      if(!audience||audience.userIds.length===0) return toast('خطأ','اختر جمهورًا صحيحًا.');
+      const message=$('#msgText').value.trim(), imageUrl=$('#imgUrl').value.trim(); if(!message && !imageUrl) return toast('خطأ','أدخل رسالة أو صورة.');
+      const delay=Math.max(0, parseInt($('#delay').value||'0',10));
+      ST.sending={running:true, paused:false, idx:0, targets:[...audience.userIds], job:{id:crypto.randomUUID(), name:`Campaign ${new Date().toLocaleString()}`, createdAt:Date.now(), successCount:0, failureCount:0}, delay};
+      savePersist(); renderSendList(ST.sending.targets); runSender(message,imageUrl,delay);
     }
-    async function runSender(message=null, imageUrl=null, delay=null){
-      if(message===null)  message  = $('#msgText')?.value?.trim() || '';
-      if(imageUrl===null) imageUrl = $('#imgUrl')?.value?.trim() || '';
-      if(delay===null)    delay    = Math.max(1, parseInt($('#delay')?.value||ST.sending.delay||'5',10));
 
-      const url = `https://graph.facebook.com/v20.0/me/messages?access_token=${encodeURIComponent(ST.token)}`;
-      let backoff = 2;
-      while(ST.sending.running && ST.sending.idx < ST.sending.targets.length){
-        if(ST.sending.paused){ savePersist(); await new Promise(r=>setTimeout(r, 500)); continue; }
-        const id = ST.sending.targets[ST.sending.idx];
-        $('#st-'+id)?.classList.remove('text-gray-500'); $('#st-'+id)?.classList.add('text-yellow-700'); $('#st-'+id).textContent='...';
+    async function runSender(message=null, imageUrl=null, delay=null){
+      if(message===null)  message=$('#msgText')?.value?.trim()||'';
+      if(imageUrl===null) imageUrl=$('#imgUrl')?.value?.trim()||'';
+      if(delay===null)    delay=Math.max(0, parseInt($('#delay')?.value||ST.sending.delay||'0',10));
+      const url=`https://graph.facebook.com/v20.0/me/messages?access_token=${encodeURIComponent(ST.token)}`;
+      let backoff=1000, maxBackoff=60000;
+      while(ST.sending.running && ST.sending.idx<ST.sending.targets.length){
+        if(ST.sending.paused){ savePersist(); await sleep(300); continue; }
+        const id=ST.sending.targets[ST.sending.idx];
+
+        // منع تكرار الإرسال لنفس المستلم
+        if(wasSent(id)){ $('#st-'+id)?.classList.add('text-gray-400'); $('#st-'+id).textContent='⏭️'; ST.sending.idx++; savePersist(); updateSendProgress(); continue; }
+
+        // التزام بالـ Rate Limit
+        while(!takeToken()){ await sleep(200); if(!ST.sending.running) return; }
+
+        $('#st-'+id)?.classList.remove('text-[var(--muted)]'); $('#st-'+id)?.classList.add('text-yellow-300'); $('#st-'+id).textContent='…';
+
         try{
-          const payload = { messaging_type:'RESPONSE', recipient:{id}, message:{} };
-          if(message)  payload.message.text = message;
-          if(imageUrl) payload.message.attachment = { type:'image', payload:{ url:imageUrl, is_reusable:true } };
-          const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-          const data = await res.json();
-          if(data.error){
-            if(String(data.error.code).includes('613') || String(data.error.code).includes('4')){
-              await new Promise(r=>setTimeout(r, backoff*1000)); backoff = Math.min(backoff*2, 60);
-              continue;
-            }
-            throw new Error(data.error.message);
+          const payload={ messaging_type:'RESPONSE', recipient:{id}, message:{} };
+          if(message)  payload.message.text=message;
+          if(imageUrl) payload.message.attachment={ type:'image', payload:{ url:imageUrl, is_reusable:true } };
+
+          const res=await fetch(url,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+          const data=await res.json();
+
+          if(!res.ok || data.error){
+            const code=data?.error?.code;
+            if(code===613 || code===4){ await sleep(jitter(backoff)); backoff=Math.min(maxBackoff, Math.round(backoff*1.8)); continue; }
+            throw new Error(data?.error?.message || ('HTTP '+res.status));
           }
-          backoff = 2;
-          ST.sending.job.successCount++;
-          $('#st-'+id).textContent='✅'; $('#st-'+id).className='text-green-700';
+
+          backoff=1000; ST.sending.job.successCount++; markSent(id);
+          $('#st-'+id).textContent='✅'; $('#st-'+id).className='text-green-300';
         }catch(e){
-          ST.sending.job.failureCount++;
-          $('#st-'+id).textContent='❌'; $('#st-'+id).className='text-red-700';
+          ST.sending.job.failureCount++; $('#st-'+id).textContent='❌'; $('#st-'+id).className='text-red-300';
         }
-        ST.sending.idx++;
-        savePersist(); updateSendProgress();
-        await new Promise(r=>setTimeout(r, delay*1000));
+
+        ST.sending.idx++; savePersist(); updateSendProgress();
+        if(delay>0) await sleep(delay*1000);
       }
-      if(ST.sending.idx >= ST.sending.targets.length){
-        const reports = LS.get('lc_reports', []);
-        reports.push(ST.sending.job); LS.set('lc_reports', reports);
+      if(ST.sending.idx>=ST.sending.targets.length){
+        const reports=LS.get('lc_reports',[]); reports.push(ST.sending.job); LS.set('lc_reports', reports);
         ST.sending.running=false; ST.sending.paused=false; savePersist();
         toast('انتهى الإرسال', `تم: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
       }
     }
 
-    // ====== “بيانات الجمهور” (جديد)
+    // ====== AudData (Saved lists)
     function renderAudDataPage(){
-      const wrap = $('#audDataWrap');
-      const empty = $('#audDataEmpty');
-      wrap.innerHTML = '';
-      if(!ST.audiences.length){ empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
-
+      const wrap=$('#audDataWrap'), empty=$('#audDataEmpty'); wrap.innerHTML='';
+      if(!ST.audiences.length){ empty.classList.remove('hidden'); return; } empty.classList.add('hidden');
       ST.audiences.forEach(a=>{
-        const total = (a.userIds?.length||0);
-        const card = document.createElement('div');
-        card.className = 'glass p-4';
-        card.innerHTML = `
-          <div class="flex items-center justify-between mb-2">
-            <b>${a.name}</b>
-            <span class="badge">${total} مستخدم</span>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button class="px-3 py-1 bg-gray-700 text-white rounded" data-act="export">تصدير CSV</button>
-            <button class="px-3 py-1 bg-blue-600 text-white rounded" data-act="rename">إعادة تسمية</button>
-            <button class="px-3 py-1 bg-red-600 text-white rounded" data-act="delete">حذف</button>
-          </div>
-        `;
-        card.querySelector('[data-act="export"]').onclick = ()=> exportListCSV(a);
-        card.querySelector('[data-act="rename"]').onclick = ()=>{
-          const nn = prompt('اسم جديد:', a.name);
-          if(nn && nn.trim()){ a.name = nn.trim(); savePersist(); renderAudDataPage(); }
-        };
-        card.querySelector('[data-act="delete"]').onclick = ()=>{
-          if(confirm('حذف القائمة؟')){
-            ST.audiences = ST.audiences.filter(x=>x.id!==a.id);
-            savePersist(); renderAudDataPage();
-          }
-        };
+        const total=(a.userIds?.length||0), card=document.createElement('div'); card.className='glass p-4';
+        card.innerHTML=`<div class="flex items-center justify-between mb-2"><b>${a.name}</b><span class="badge">${total} مستخدم</span></div>
+                        <div class="flex flex-wrap gap-2">
+                          <button class="btn" data-act="export">تصدير CSV</button>
+                          <button class="btn primary" data-act="rename">إعادة تسمية</button>
+                          <button class="btn danger" data-act="delete">حذف</button>
+                        </div>`;
+        card.querySelector('[data-act="export"]').onclick=()=>exportListCSV(a);
+        card.querySelector('[data-act="rename"]').onclick=()=>{ const nn=prompt('اسم جديد:', a.name); if(nn&&nn.trim()){ a.name=nn.trim(); savePersist(); renderAudDataPage(); } };
+        card.querySelector('[data-act="delete"]').onclick=()=>{ if(confirm('حذف القائمة؟')){ ST.audiences=ST.audiences.filter(x=>x.id!==a.id); savePersist(); renderAudDataPage(); } };
         wrap.appendChild(card);
       });
-
       $('#btnExportAllAud')?.addEventListener('click', ()=>{
-        const rows = [['list_name','id']];
-        ST.audiences.forEach(a=> (a.userIds||[]).forEach(id=> rows.push([a.name, id])));
-        downloadCSV(rows, 'audience_lists.csv');
+        const rows=[['list_name','id']]; ST.audiences.forEach(a=> (a.userIds||[]).forEach(id=> rows.push([a.name,id]))); downloadCSV(rows,'audience_lists.csv');
       });
     }
-    function exportListCSV(a){
-      const rows = [['id']].concat((a.userIds||[]).map(id=>[id]));
-      downloadCSV(rows, (a.name||'audience')+'.csv');
-    }
+    function exportListCSV(a){ const rows=[['id']].concat((a.userIds||[]).map(id=>[id])); downloadCSV(rows,(a.name||'audience')+'.csv'); }
     function downloadCSV(rows, filename){
-      const csv = rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
-      const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
-      const a = document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
+      const csv=rows.map(r=>r.map(x=>`"${String(x).replaceAll('"','""')}"`).join(',')).join('\n');
+      const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
     }
 
     // ====== Reports
     function renderReports(){
-      const wrap = $('#reportsWrap'); const empty = $('#noReports');
-      const reports = LS.get('lc_reports', []);
-      wrap.innerHTML=''; if(reports.length===0){ empty.classList.remove('hidden'); return; }
-      empty.classList.add('hidden');
+      const wrap=$('#reportsWrap'), empty=$('#noReports'); const reports=LS.get('lc_reports',[]);
+      wrap.innerHTML=''; if(reports.length===0){ empty.classList.remove('hidden'); return; } empty.classList.add('hidden');
       reports.slice().reverse().forEach(c=>{
-        const total = (c.successCount||0)+(c.failureCount||0);
-        const card = document.createElement('div'); card.className='glass p-4';
-        card.innerHTML = `<div class="flex items-center justify-between">
-          <b>${c.name||'Campaign'}</b><span class="text-sm">${new Date(c.createdAt).toLocaleString()}</span></div>
-          <div class="mt-2 text-sm text-gray-700">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`;
+        const total=(c.successCount||0)+(c.failureCount||0), card=document.createElement('div'); card.className='glass p-4';
+        card.innerHTML=`<div class="flex items-center justify-between"><b>${c.name||'Campaign'}</b><span class="text-sm">${new Date(c.createdAt).toLocaleString()}</span></div>
+                        <div class="mt-2 text-sm text-[var(--muted)]">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`;
         wrap.appendChild(card);
       });
     }
 
     // ====== Boot
     function initAfterLogin(){
-      setConnectedUI(!!ST.token && !!ST.pageId, null);
+      setConnectedUI(!!ST.token && !!ST.pageId,null);
       if(ST.fetching.running && !ST.fetching.paused && ST.fetching.next) fetchLoop();
-      if(ST.sending.running && !ST.sending.paused){
-        renderSendList(ST.sending.targets);
-        runSender();
-      }
+      if(ST.sending.running && !ST.sending.paused){ renderSendList(ST.sending.targets); runSender(); }
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
+    $('#mOk').onclick=()=> $('#modal').classList.add('hidden');
 
-    // events
-    $('#adminLoginBtn').onclick = doLogin;
-    $('#adminPass').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doLogin(); });
-    $('#mOk').onclick = ()=> $('#modal').classList.add('hidden');
-
-    if(localStorage.getItem('lc_logged')==='1'){
-      $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); initAfterLogin();
-    }else{
-      $('#app').classList.add('hidden');
-    }
-    render(); // initial
+    if(localStorage.getItem('lc_logged')==='1'){ $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); initAfterLogin(); }
+    else { $('#app').classList.add('hidden'); }
+    render();
   </script>
 </body>
 </html>
