@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linux Campaign</title>
+    <title>Linux Campaign (No Google Auth)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,15 +58,26 @@
 </head>
 <body class="text-gray-800">
 
-    <!-- Login Overlay -->
+    <!-- Simple Admin Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50 backdrop-blur-sm">
         <div class="w-full max-w-md p-8 bg-white/80 rounded-2xl shadow-2xl fade-in text-center">
-             <h1 class="text-4xl font-extrabold text-gray-900">Linux <span class="text-blue-600">Campaign</span></h1>
-             <p class="text-gray-600 mt-4 mb-8">أداة إدارة حملات فيسبوك ماسنجر. سجل الدخول للبدء.</p>
-             <button id="googleSignInButton" class="w-full py-3 bg-white hover:bg-gray-100 text-gray-800 font-semibold rounded-lg transition flex items-center justify-center border border-gray-300 shadow-sm">
-                <svg class="w-5 h-5 ml-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.519-3.487-11.187-8.264l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.022,35.372,44,30.038,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
-                <span>تسجيل الدخول باستخدام جوجل</span>
-             </button>
+            <h1 class="text-4xl font-extrabold text-gray-900">Linux <span class="text-blue-600">Campaign</span></h1>
+            <p class="text-gray-600 mt-4 mb-8">تسجيل دخول بسيط.</p>
+            <div class="space-y-4 text-right">
+                <div>
+                    <label class="block text-sm font-medium mb-1">المستخدم</label>
+                    <input id="adminUser" type="text" placeholder="admin" class="w-full p-3">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">كلمة المرور</label>
+                    <input id="adminPass" type="password" placeholder="••••••••" class="w-full p-3">
+                </div>
+                <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                    دخول
+                </button>
+                <p id="loginError" class="text-red-600 text-sm hidden mt-2">بيانات الدخول غير صحيحة.</p>
+                <p class="text-xs text-gray-500 pt-2">⚠️ هذا تسجيل دخول تجريبي (غير آمن للإنتاج).</p>
+            </div>
         </div>
     </div>
 
@@ -114,7 +125,8 @@
         </div>
     </div>
 
-    <!-- Templates -->
+    <!-- Templates (unchanged from your original file) -->
+    <!-- For brevity, templates are identical to your previous version -->
     <template id="dashboard-template">
         <div class="fade-in grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="card p-6"><p class="text-gray-500" data-translate-key="totalAudience">إجمالي الجمهور</p><p id="totalUsersStat" class="text-3xl font-bold mt-2">0</p></div>
@@ -122,7 +134,6 @@
             <div class="card p-6"><p class="text-gray-500" data-translate-key="successRate">معدل النجاح</p><p id="successRateStat" class="text-3xl font-bold mt-2">0%</p></div>
         </div>
     </template>
-    
     <template id="audience-template">
         <div class="fade-in grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
@@ -344,21 +355,24 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, onSnapshot, query, where, updateDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
         
+        // *** IMPORTANT ***
+        // This version removes Firebase Authentication entirely and uses a very simple local login.
+        // Credentials: username = 'admin', password = 'mO..012812' (DO NOT use in production).
+
         const translations = {
             ar: { accountSettings: "إعدادات الحساب", welcomeMessage: "مرحباً بك. قم بربط صفحتك للبدء.", connectButton: "اتصال آمن", connecting: "جاري الاتصال...", connectError: "فشل الاتصال:", navDashboard: "لوحة المعلومات", navAudience: "الجمهور", navContent: "المحتوى", navCampaigns: "إنشاء حملة", navReports: "التقارير", navSettings: "الإعدادات", totalAudience: "إجمالي الجمهور", campaignsSent: "الحملات المرسلة", successRate: "معدل النجاح", audienceControlCenter: "مركز التحكم بالجمهور", total: "المجموع", startFetch: "بدء السحب", pause: "إيقاف مؤقت", resume: "استئناف", stop: "إيقاف", copyIds: "نسخ IDs", exportTxt: "حفظ IDs (.txt)", exportCsv: "تصدير (.csv)", selected: "المحدد", createCampaignForSelected: "إنشاء حملة للمحددين", user: "مستخدم", connectionSettings: "إعدادات الاتصال", pageId: "معرّف الصفحة", accessToken: "توكن الوصول", saveAndReconnect: "حفظ والاتصال", dangerZone: "منطقة الخطر", disconnectWarning: "سيؤدي قطع الاتصال إلى مسح بياناتك المحفوظة.", disconnect: "قطع الاتصال", saveAudience: "حفظ الجمهور", noSavedAudiences: "لا توجد قوائم محفوظة بعد.", chooseAudience: "1. اختر الجمهور", sendingControls: "3. التحكم بالإرسال", safetyDelay: "الفاصل الزمني (ثواني)", sendCampaign: "إرسال الحملة", sendingList: "قائمة الإرسال", status: "الحالة", imageLibrary: "مكتبة الصور", imageName: "اسم الصورة", uploadImage: "رفع صورة", saveImage: "حفظ الصورة", savedImages: "الصور المحفوظة", noSavedImages: "لا توجد صور محفوظة بعد.", captionLibrary: "مكتبة النصوص", captionName: "اسم النص", caption: "النص", saveCaption: "حفظ النص", savedCaptions: "النصوص المحفوظة", noSavedCaptions: "لا توجد نصوص محفوظة بعد.", step1: "الخطوة 1: اختر جمهورك", step2: "الخطوة 2: جهز رسالتك", step3: "الخطوة 3: إعدادات الإرسال", chooseSavedImage: "اختر صورة محفوظة", orImageUrl: "أو أدخل رابط صورة", chooseSavedCaption: "اختر نصًا محفوظًا", orWriteCaption: "أو اكتب رسالتك", campaignQueued: "تمت جدولة الحملة بنجاح!", campaignQueuedMsg: "تم إرسال حملتك إلى الخادم للمعالجة.", errorTitle: "خطأ", selectAudienceError: "الرجاء اختيار جمهور أولاً قبل إرسال الحملة.", emptyCampaignError: "لا يمكن إرسال حملة فارغة. الرجاء كتابة رسالة أو إضافة رابط صورة.", emptyAudienceError: "الجمهور الذي اخترته فارغ. لا يوجد مستخدمون للإرسال إليهم.", noReports: "لا توجد تقارير حملات لعرضها.", campaignName: "اسم الحملة", enterCampaignName: "أدخل اسمًا لهذه الحملة.", statusPending: "قيد الانتظار", statusInProgress: "جاري الإرسال", statusPaused: "متوقفة مؤقتاً", statusStopped: "متوقفة", statusCompleted: "مكتملة", sent: "تم الإرسال", failed: "فشل", of: "من" }
         };
 
         document.addEventListener('DOMContentLoaded', () => {
-            let db, auth, storage;
+            let db, storage;
             const state = { 
                 pageId: null, accessToken: null, pageName: null,
                 users: new Map(), savedAudiences: new Map(), savedImages: new Map(), savedCaptions: new Map(),
                 selectedUsers: new Set(), isFetching: false, isFetchPaused: false, 
-                currentLang: 'ar', nextFetchUrl: null, userId: null, appId: 'default-app-id',
+                currentLang: 'ar', nextFetchUrl: null, userId: null, appId: 'linux-campaign',
                 campaignDraft: { audience: '', image: '', caption: '', imageUrl: '', messageContent: '', delay: 5, campaignName: '' },
                 listeners: new Map()
             };
@@ -368,7 +382,9 @@
             const mainContentContainer = document.getElementById('mainContentContainer');
             const pageTitle = document.getElementById('pageTitle');
             const navItems = document.querySelectorAll('.nav-item');
-            
+            const loginError = document.getElementById('loginError');
+
+            // Firestore paths use state.userId; we'll use a fixed id for this simple login
             function getUserSettingsDoc() { return doc(db, `artifacts/${state.appId}/users/${state.userId}/settings/main`); }
             function getImagesCollection() { return collection(db, `artifacts/${state.appId}/users/${state.userId}/images`); }
             function getCaptionsCollection() { return collection(db, `artifacts/${state.appId}/users/${state.userId}/captions`); }
@@ -435,8 +451,8 @@
                     captions: getCaptionsCollection(),
                     campaigns: query(getCampaignsCollection(), where("userId", "==", state.userId))
                 };
-                for (const [key, ref] of Object.entries(collections)) {
-                    const unsub = onSnapshot(ref, (snapshot) => {
+                for (const [key, refCol] of Object.entries(collections)) {
+                    const unsub = onSnapshot(refCol, (snapshot) => {
                         if (key === 'audiences') {
                             state.savedAudiences.clear();
                             snapshot.forEach(doc => state.savedAudiences.set(doc.id, doc.data()));
@@ -574,8 +590,13 @@
             }
             
             function initSettingsPage() {
-                document.getElementById('userEmail').textContent = auth.currentUser.email;
-                document.getElementById('signOutButton').addEventListener('click', () => signOut(auth));
+                document.getElementById('userEmail').textContent = 'admin';
+                document.getElementById('signOutButton').addEventListener('click', () => {
+                    localStorage.removeItem('isLoggedIn');
+                    state.userId = null;
+                    mainApp.classList.add('hidden');
+                    loginOverlay.classList.remove('hidden');
+                });
                 document.getElementById('settingsPageId').value = state.pageId || '';
                 document.getElementById('settingsAccessToken').value = state.accessToken || '';
                 document.getElementById('saveSettingsButton').addEventListener('click', () => {
@@ -865,7 +886,7 @@
                         data.data?.forEach(conv => {
                             const user = conv.participants?.data?.find(p => p.id !== state.pageId);
                             if (user && !state.users.has(user.id)) {
-                                const pictureUrl = user.picture?.data?.url ?? `https://placehold.co/40x40/E2E8F0/333?text=${user.name.charAt(0)}`;
+                                const pictureUrl = user.picture?.data?.url ?? `https://placehold.co/40x40/E2E8F0/333?text=${user.name?.charAt(0) ?? "U"}`;
                                 state.users.set(user.id, { name: user.name, id: user.id, picture: pictureUrl });
                             }
                         });
@@ -915,62 +936,64 @@
                 if(panel) panel.classList.toggle('hidden', count === 0);
             }
 
-            async function mainInit() {
-                try {
-                    state.appId = typeof __app_id !== 'undefined' ? __app_id : 'linux-campaign';
-                    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{"apiKey":"AIzaSyAboqjO74kRbRr27XBCBujd3BC7d69DdX0","authDomain":"linux-campaign.firebaseapp.com","projectId":"linux-campaign","storageBucket":"linux-campaign.appspot.com","messagingSenderId":"289189226812","appId":"1:289189226812:web:5ee74601f4853c5b6b9639","measurementId":"G-XBVQBCL1GW"}');
-                    const app = initializeApp(firebaseConfig);
-                    db = getFirestore(app); 
-                    auth = getAuth(app); 
-                    storage = getStorage(app);
-
-                    document.getElementById('googleSignInButton').addEventListener('click', () => {
-                        const provider = new GoogleAuthProvider();
-                        signInWithPopup(auth, provider).catch(error => console.error("Google sign in error", error));
-                    });
-
-                    onAuthStateChanged(auth, async (user) => {
-                        if (user) {
-                            // User is signed in.
-                            loginOverlay.classList.add('hidden');
-                            mainApp.style.display = 'flex';
-                            state.userId = user.uid;
-
-                            const settingsSnap = await getDoc(getUserSettingsDoc());
-                            if (settingsSnap.exists() && settingsSnap.data().pageId && settingsSnap.data().accessToken) {
-                                await handleConnect(settingsSnap.data().pageId, settingsSnap.data().accessToken);
-                            } else {
-                                enterDisconnectedState();
-                            }
-                            const view = window.location.hash.replace('#', '') || 'dashboard';
-                            navigate(view);
-
-                        } else {
-                            // User is signed out.
-                            mainApp.style.display = 'none';
-                            loginOverlay.classList.remove('hidden');
-                            stopListeners();
-                        }
-                    });
-                    
-                } catch (e) {
-                    console.error("Initialization failed:", e);
-                    mainApp.style.display = 'none';
-                    loginOverlay.classList.remove('hidden');
+            // ==== Simple local login ====
+            function doLogin() {
+                const u = (document.getElementById('adminUser').value || '').trim();
+                const p = (document.getElementById('adminPass').value || '').trim();
+                if (u === 'admin' && p === 'mO..012812') {
+                    localStorage.setItem('isLoggedIn', '1');
+                    state.userId = 'admin';
+                    loginError.classList.add('hidden');
+                    loginOverlay.classList.add('hidden');
+                    mainApp.classList.remove('hidden');
+                    mainApp.style.display = 'flex';
+                    initAfterLogin();
+                } else {
+                    loginError.classList.remove('hidden');
                 }
-                setLanguage('ar');
-
-                window.addEventListener('hashchange', () => {
-                    const newView = window.location.hash.replace('#', '') || 'dashboard';
-                    if (auth.currentUser) {
-                         navigate(newView);
-                    }
-                });
             }
-            
-            mainInit();
+
+            function initAfterLogin() {
+                // Init firebase (Firestore/Storage only)
+                const firebaseConfig = {"apiKey":"AIzaSyAboqjO74kRbRr27XBCBujd3BC7d69DdX0","authDomain":"linux-campaign.firebaseapp.com","projectId":"linux-campaign","storageBucket":"linux-campaign.appspot.com","messagingSenderId":"289189226812","appId":"1:289189226812:web:5ee74601f4853c5b6b9639","measurementId":"G-XBVQBCL1GW"};
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                storage = getStorage(app);
+
+                // Restore saved page connection if exists
+                getDoc(getUserSettingsDoc()).then(snap => {
+                    if (snap.exists() && snap.data().pageId && snap.data().accessToken) {
+                        handleConnect(snap.data().pageId, snap.data().accessToken);
+                    } else {
+                        enterDisconnectedState();
+                    }
+                }).catch(() => enterDisconnectedState());
+
+                const view = window.location.hash.replace('#', '') || 'dashboard';
+                navigate(view);
+                setLanguage('ar');
+            }
+
+            document.getElementById('adminLoginBtn').addEventListener('click', doLogin);
+            document.getElementById('adminPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+
+            // Auto-login if previously logged in
+            if (localStorage.getItem('isLoggedIn') === '1') {
+                state.userId = 'admin';
+                loginOverlay.classList.add('hidden');
+                mainApp.classList.remove('hidden');
+                mainApp.style.display = 'flex';
+                initAfterLogin();
+            }
+
+            // Handle hash navigation after login
+            window.addEventListener('hashchange', () => {
+                const newView = window.location.hash.replace('#', '') || 'dashboard';
+                if (localStorage.getItem('isLoggedIn') === '1') {
+                    navigate(newView);
+                }
+            });
         });
     </script>
 </body>
 </html>
-
