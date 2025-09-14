@@ -1,0 +1,9 @@
+{
+  "name": "linux-campaign-server",
+  "version": "1.0.0",
+  "description": "Serverless functions for Linux Campaign",
+  "main": "api/index.js",
+  "dependencies": {
+    "node-fetch": "^2.6.7" 
+  }
+}
