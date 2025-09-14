@@ -1,999 +1,525 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linux Campaign (No Google Auth)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { 
-            font-family: 'Cairo', sans-serif; 
-            background-color: #e9eef2;
-            background-image:
-                radial-gradient(at 10% 20%, hsla(210, 50%, 98%, 0.4) 0, transparent 50%),
-                radial-gradient(at 80% 80%, hsla(220, 50%, 95%, 0.3) 0, transparent 50%);
-            min-height: 100vh;
-        }
-        .card { 
-            background: rgba(255, 255, 255, 0.4);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-        }
-        .nav-item.active { 
-             background-color: rgba(255, 255, 255, 0.7);
-             color: #1e3a8a;
-             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        #mainApp { background-color: transparent; }
-        aside, header {
-            background: rgba(255, 255, 255, 0.25);
-            -webkit-backdrop-filter: blur(24px);
-            backdrop-filter: blur(24px);
-            border-color: rgba(255, 255, 255, 0.18) !important;
-        }
-        input[type="text"], input[type="password"], input[type="number"], select, textarea {
-            background-color: rgba(255, 255, 255, 0.5) !important;
-            border-radius: 12px !important;
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px);
-            color: #1f2937;
-        }
-        input::placeholder, textarea::placeholder { color: #6b7280; }
-        .loader { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #fff; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        .audience-scroll-container { max-height: 70vh; overflow-y: auto; }
-        progress { border-radius: 7px; height: 12px; }
-        progress::-webkit-progress-bar { background-color: rgba(0,0,0,0.1); border-radius: 7px; }
-        progress::-webkit-progress-value { background-color: #3b82f6; border-radius: 7px; transition: width 0.5s ease-in-out; }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux Campaign — Local (No Firebase)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Cairo',sans-serif;background:#eef3f7;}
+    .glass{background:rgba(255,255,255,.55);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.35);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.07);}
+    .card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;}
+    .nav-item.active{background:#fff;color:#1e3a8a;box-shadow:0 1px 10px rgba(0,0,0,.06);}
+    .loader{border:4px solid rgba(0,0,0,.08);border-top:4px solid #111827;border-radius:50%;width:22px;height:22px;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 </head>
 <body class="text-gray-800">
 
-    <!-- Simple Admin Login Overlay -->
-    <div id="loginOverlay" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="w-full max-w-md p-8 bg-white/80 rounded-2xl shadow-2xl fade-in text-center">
-            <h1 class="text-4xl font-extrabold text-gray-900">Linux <span class="text-blue-600">Campaign</span></h1>
-            <p class="text-gray-600 mt-4 mb-8">تسجيل دخول بسيط.</p>
-            <div class="space-y-4 text-right">
-                <div>
-                    <label class="block text-sm font-medium mb-1">المستخدم</label>
-                    <input id="adminUser" type="text" placeholder="admin" class="w-full p-3">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">كلمة المرور</label>
-                    <input id="adminPass" type="password" placeholder="••••••••" class="w-full p-3">
-                </div>
-                <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
-                    دخول
-                </button>
-                <p id="loginError" class="text-red-600 text-sm hidden mt-2">بيانات الدخول غير صحيحة.</p>
-                <p class="text-xs text-gray-500 pt-2">⚠️ هذا تسجيل دخول تجريبي (غير آمن للإنتاج).</p>
-            </div>
+  <!-- Login -->
+  <div id="loginOverlay" class="fixed inset-0 bg-gray-900/80 flex items-center justify-center z-50">
+    <div class="glass w-full max-w-md p-8 text-center">
+      <h1 class="text-3xl font-extrabold">Linux <span class="text-blue-600">Campaign</span></h1>
+      <p class="text-gray-600 mt-3">تسجيل دخول محلي (بدون Firebase)</p>
+      <div class="text-right mt-6 space-y-4">
+        <div>
+          <label class="text-sm font-medium">المستخدم</label>
+          <input id="adminUser" class="w-full mt-1 p-3 border rounded-lg" placeholder="admin">
         </div>
+        <div>
+          <label class="text-sm font-medium">كلمة المرور</label>
+          <input id="adminPass" type="password" class="w-full mt-1 p-3 border rounded-lg" placeholder="••••••••">
+        </div>
+        <button id="adminLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold">دخول</button>
+        <p id="loginError" class="hidden text-red-600 text-sm">بيانات الدخول غير صحيحة.</p>
+        <p class="text-xs text-gray-500">⚠️ مخصّص للاختبار فقط.</p>
+      </div>
     </div>
+  </div>
 
-    <div id="mainApp" class="hidden h-screen flex">
-        <!-- Sidebar -->
-        <aside class="w-64 flex flex-col border-l border-gray-200">
-             <div class="h-20 flex items-center justify-center border-b">
-                 <h1 class="text-2xl font-extrabold text-gray-800">Linux <span class="text-blue-500">Campaign</span></h1>
-             </div>
-             <nav class="flex-1 px-4 py-6 space-y-2">
-                 <a href="#dashboard" id="navDashboard" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navDashboard">لوحة المعلومات</span></a>
-                 <a href="#audience" id="navAudience" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navAudience">الجمهور</span></a>
-                 <a href="#content" id="navContent" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navContent">المحتوى</span></a>
-                 <a href="#campaigns" id="navCampaigns" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navCampaigns">إنشاء حملة</span></a>
-                 <a href="#reports" id="navReports" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navReports">التقارير</span></a>
-             </nav>
-             <div class="px-4 py-4 border-t border-gray-200/50">
-                 <a href="#settings" id="navSettings" class="nav-item flex items-center p-3 rounded-lg font-semibold"><span data-translate-key="navSettings">الإعدادات</span></a>
-             </div>
-        </aside>
-        
-        <div class="flex-1 flex flex-col overflow-hidden">
-             <header class="h-20 p-6 flex justify-between items-center border-b">
-                 <h2 id="pageTitle" class="text-2xl font-bold text-gray-800"></h2>
-                 <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                     <button id="lang-switcher" class="p-2 rounded-full hover:bg-gray-200/50">
-                         <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m4 13l4-4M19 5h-4M3 19h12M9 17v2M13 13L9 17m4-4l4 4m-4-4v-2m0 6V5m0 0a2 2 0 100 4 2 2 0 000-4zm0 12a2 2 0 100 4 2 2 0 000-4z"></path></svg>
-                     </button>
-                     <div class="flex items-center">
-                         <span id="pageName" class="font-semibold text-gray-600"></span>
-                         <span class="h-3 w-3 rounded-full bg-red-500 mr-3 animate-pulse"></span>
-                     </div>
-                 </div>
-             </header>
-
-             <div id="disconnected-banner" class="hidden bg-yellow-100/50 border-b-2 border-yellow-400/50 text-yellow-800 p-3" role="alert">
-                <div class="flex items-center">
-                    <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.636-1.214 2.852-1.214 3.488 0l6.22 11.858c.632 1.208-.475 2.688-1.744 2.688H3.78c-1.27 0-2.376-1.48-1.744-2.688L8.257 3.099zM9 13a1 1 0 112 0 1 1 0 01-2 0zm1-6a1 1 0 00-1 1v3a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                    <p class="font-bold">غير متصل.</p>
-                    <p class="text-sm mx-2">الرجاء الذهاب إلى <a href="#settings" class="underline font-semibold hover:text-yellow-900" onclick="document.getElementById('navSettings').click()">الإعدادات</a> لتوصيل صفحتك.</p>
-                </div>
-            </div>
-
-             <main id="mainContentContainer" class="flex-1 overflow-y-auto p-6"></main>
+  <!-- App -->
+  <div id="app" class="hidden h-screen">
+    <div class="h-full grid grid-cols-[260px_1fr]">
+      <aside class="glass p-4" id="sidebar">
+        <div class="h-16 flex items-center justify-center border-b">
+          <h2 class="font-extrabold text-xl">Linux <span class="text-blue-600">Campaign</span></h2>
         </div>
+        <nav class="pt-4 space-y-2">
+          <a href="#dashboard" id="navDashboard" class="nav-item block px-4 py-2 rounded-lg">لوحة المعلومات</a>
+          <a href="#audience"  id="navAudience"  class="nav-item block px-4 py-2 rounded-lg">الجمهور</a>
+          <a href="#content"   id="navContent"   class="nav-item block px-4 py-2 rounded-lg">المحتوى</a>
+          <a href="#campaigns" id="navCampaigns" class="nav-item block px-4 py-2 rounded-lg">إنشاء حملة</a>
+          <a href="#reports"   id="navReports"   class="nav-item block px-4 py-2 rounded-lg">التقارير</a>
+        </nav>
+        <div class="pt-4 border-t mt-4">
+          <a href="#settings" id="navSettings" class="nav-item block px-4 py-2 rounded-lg">الإعدادات</a>
+        </div>
+      </aside>
+
+      <div class="flex flex-col">
+        <header class="glass h-16 px-6 flex items-center justify-between">
+          <h3 id="pageTitle" class="text-xl font-bold"></h3>
+          <div class="flex items-center gap-3">
+            <span id="pageName" class="text-gray-600">غير متصل</span>
+            <span id="statusDot" class="inline-block w-3 h-3 rounded-full bg-red-500"></span>
+          </div>
+        </header>
+
+        <div id="bannerDisconnected" class="hidden bg-yellow-100 border-y border-yellow-300 text-yellow-900 px-4 py-2">
+          غير متصل. أدخل Page ID و Access Token من الإعدادات.
+        </div>
+
+        <main id="viewRoot" class="p-6 overflow-y-auto"></main>
+      </div>
     </div>
+  </div>
 
-    <!-- Templates (unchanged from your original file) -->
-    <!-- For brevity, templates are identical to your previous version -->
-    <template id="dashboard-template">
-        <div class="fade-in grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="card p-6"><p class="text-gray-500" data-translate-key="totalAudience">إجمالي الجمهور</p><p id="totalUsersStat" class="text-3xl font-bold mt-2">0</p></div>
-            <div class="card p-6"><p class="text-gray-500" data-translate-key="campaignsSent">الحملات المرسلة</p><p id="campaignsSentStat" class="text-3xl font-bold mt-2">0</p></div>
-            <div class="card p-6"><p class="text-gray-500" data-translate-key="successRate">معدل النجاح</p><p id="successRateStat" class="text-3xl font-bold mt-2">0%</p></div>
-        </div>
-    </template>
-    <template id="audience-template">
-        <div class="fade-in grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">
-                <div class="card p-6">
-                     <div class="flex justify-between items-center">
-                         <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                             <h3 class="text-xl font-bold" data-translate-key="audienceControlCenter">مركز التحكم بالجمهور</h3>
-                             <div class="relative">
-                                 <button id="export-menu-button" class="p-2 rounded-full hover:bg-gray-100/50">
-                                     <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                                 </button>
-                                 <div id="export-menu" class="hidden absolute top-full ltr:left-0 rtl:right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border">
-                                     <a href="#" id="copy-ids-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-translate-key="copyIds">نسخ IDs</a>
-                                     <a href="#" id="export-txt-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-translate-key="exportTxt">حفظ IDs (.txt)</a>
-                                     <a href="#" id="export-csv-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-translate-key="exportCsv">تصدير (.csv)</a>
-                                 </div>
-                             </div>
-                         </div>
-                         <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                             <span class="font-bold text-gray-600"><span data-translate-key="total">المجموع</span>: <span id="fetch-counter" class="text-blue-600 text-lg">0</span></span>
-                             <button id="fetchUsersButton" class="px-5 py-2 bg-blue-600 text-white rounded-lg font-semibold flex items-center w-48 justify-center">
-                                 <span data-translate-key="startFetch">بدء السحب</span>
-                             </button>
-                             <button id="stopFetchButton" class="hidden px-5 py-2 bg-red-600 text-white rounded-lg font-semibold flex items-center">
-                                 <span data-translate-key="stop">إيقاف</span>
-                             </button>
-                         </div>
-                     </div>
-                </div>
-                <div id="audience-actions" class="card p-4 hidden">
-                     <div class="flex items-center justify-between">
-                         <span class="font-semibold"><span data-translate-key="selected">المحدد</span>: <span id="selected-count">0</span></span>
-                         <div>
-                             <button id="save-audience-button" class="px-5 py-2 bg-yellow-500 text-white rounded-lg font-semibold"><span data-translate-key="saveAudience">حفظ الجمهور</span></button>
-                             <button id="start-campaign-from-audience" class="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold"><span data-translate-key="createCampaignForSelected">إنشاء حملة للمحددين</span> (<span id="selected-count-btn">0</span>)</button>
-                         </div>
-                     </div>
-                </div>
-                <div class="card audience-scroll-container">
-                     <table class="w-full">
-                         <thead class="bg-gray-50/50 sticky top-0"><tr><th class="p-4 w-10"><input type="checkbox" id="select-all-checkbox"></th><th class="p-4 text-right" data-translate-key="user">المستخدم</th><th class="p-4 text-right">ID</th><th class="p-4 text-right" data-translate-key="status">الحالة</th></tr></thead>
-                         <tbody id="audience-table-body" class="divide-y divide-gray-200/50"></tbody>
-                     </table>
-                </div>
-            </div>
-            <div class="card p-6">
-                <h3 class="text-xl font-bold" data-translate-key="savedAudiences">قوائم الجمهور المحفوظة</h3>
-                <div id="saved-audiences-list" class="mt-4 space-y-2">
-                    <p class="text-gray-500" data-translate-key="noSavedAudiences">لا توجد قوائم محفوظة بعد.</p>
-                </div>
-            </div>
-        </div>
-    </template>
-
-    <template id="content-template">
-        <div class="fade-in grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="space-y-6">
-                <div class="card p-6">
-                    <h3 class="font-bold text-lg mb-4" data-translate-key="imageLibrary">مكتبة الصور</h3>
-                    <div class="space-y-4">
-                        <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="imageName">اسم الصورة</label>
-                             <input type="text" id="imageName" placeholder="مثال: صورة العرض الرئيسية">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="uploadImage">رفع صورة</label>
-                            <input type="file" id="imageUpload" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        </div>
-                        <div class="flex justify-end">
-                            <button id="save-image-button" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold flex items-center justify-center">
-                                <span data-translate-key="saveImage">حفظ الصورة</span>
-                            </button>
-                        </div>
-                     </div>
-                </div>
-                <div class="card p-6">
-                    <h3 class="text-xl font-bold" data-translate-key="savedImages">الصور المحفوظة</h3>
-                    <div id="saved-images-list" class="mt-4 space-y-2 max-h-[50vh] overflow-y-auto"></div>
-                </div>
-            </div>
-            <div class="space-y-6">
-                 <div class="card p-6">
-                    <h3 class="font-bold text-lg mb-4" data-translate-key="captionLibrary">مكتبة النصوص</h3>
-                    <div class="space-y-4">
-                        <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="captionName">اسم النص</label>
-                             <input type="text" id="captionName" placeholder="مثال: نص الترحيب">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="caption">النص</label>
-                            <textarea id="captionText" class="h-32" placeholder="اكتب النص هنا..."></textarea>
-                        </div>
-                        <div class="flex justify-end">
-                            <button id="save-caption-button" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold"><span data-translate-key="saveCaption">حفظ النص</span></button>
-                        </div>
-                     </div>
-                </div>
-                <div class="card p-6">
-                    <h3 class="text-xl font-bold" data-translate-key="savedCaptions">النصوص المحفوظة</h3>
-                    <div id="saved-captions-list" class="mt-4 space-y-2 max-h-[50vh] overflow-y-auto"></div>
-                </div>
-            </div>
-        </div>
-    </template>
-    
-    <template id="campaigns-template">
-         <div class="fade-in grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="space-y-6">
-                <div class="card p-6">
-                    <h3 class="font-bold text-lg" data-translate-key="step1">الخطوة 1: اختر جمهورك</h3>
-                    <select id="audience-select-dropdown" class="w-full mt-2 p-3"></select>
-                </div>
-                 <div class="card p-6">
-                    <h3 class="font-bold text-lg" data-translate-key="step2">الخطوة 2: جهز رسالتك</h3>
-                    <div class="space-y-4 mt-2">
-                        <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="chooseSavedImage">اختر صورة محفوظة</label>
-                             <select id="load-image-dropdown" class="w-full p-3">
-                                <option value="">-- اختر صورة --</option>
-                             </select>
-                        </div>
-                         <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="orImageUrl">أو أدخل رابط صورة</label>
-                             <input type="text" id="imageUrl" class="w-full p-3" placeholder="https://example.com/image.png">
-                         </div>
-                         <hr class="border-gray-300/50">
-                        <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="chooseSavedCaption">اختر نصًا محفوظًا</label>
-                             <select id="load-caption-dropdown" class="w-full p-3">
-                                <option value="">-- اختر نصًا --</option>
-                             </select>
-                        </div>
-                        <div>
-                             <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="orWriteCaption">أو اكتب رسالتك</label>
-                             <textarea id="messageContent" class="w-full p-3 h-32" placeholder="اكتب رسالتك هنا..."></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="space-y-6">
-                <div class="card p-6">
-                    <h3 class="font-bold text-lg" data-translate-key="step3">الخطوة 3: إعدادات الإرسال</h3>
-                    <div class="space-y-4 mt-2">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="campaignName">اسم الحملة</label>
-                            <input type="text" id="campaignNameInput" class="w-full p-3" placeholder="مثال: حملة العيد">
-                        </div>
-                        <div class="flex items-center space-x-4 rtl:space-x-reverse">
-                             <div>
-                                 <label class="block text-sm font-medium" data-translate-key="safetyDelay">الفاصل الزمني (ثواني)</label>
-                                 <input type="number" id="send-delay" value="5" min="1" class="w-32 p-2">
-                             </div>
-                             <div id="campaign-buttons-container" class="flex items-center space-x-2 rtl:space-x-reverse pt-5">
-                                 <button id="send-campaign-button" class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold w-48 text-center"><span data-translate-key="sendCampaign">إرسال الحملة</span></button>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card p-6">
-                     <h3 class="font-bold text-lg mb-2" data-translate-key="sendingList">قائمة الإرسال (<span id="campaign-target-count">0</span>)</h3>
-                     <div id="campaign-audience-list" class="max-h-64 overflow-y-auto divide-y divide-gray-200/50"></div>
-                </div>
-            </div>
-         </div>
-    </template>
-
-    <template id="reports-template">
-        <div class="fade-in">
-            <div id="campaign-reports-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-             <div id="no-reports-message" class="hidden text-center py-10 card">
-                <p class="text-gray-500 text-lg" data-translate-key="noReports">لا توجد تقارير حملات لعرضها.</p>
-            </div>
-        </div>
-    </template>
-    
-    <template id="settings-template">
-         <div class="fade-in max-w-2xl mx-auto space-y-6">
-             <div class="card p-8">
-                <h3 class="text-2xl font-bold mb-6" data-translate-key="accountSettings">إعدادات الحساب</h3>
-                <div class="flex justify-between items-center">
-                    <div>
-                        <p class="text-gray-600">مسجل الدخول كـ:</p>
-                        <p id="userEmail" class="font-semibold text-gray-800"></p>
-                    </div>
-                    <button id="signOutButton" class="px-6 py-2 bg-gray-600 text-white rounded-lg font-semibold">تسجيل الخروج</button>
-                </div>
-             </div>
-             <div class="card p-8">
-                 <h3 class="text-2xl font-bold mb-6" data-translate-key="connectionSettings">إعدادات الاتصال</h3>
-                 <div class="space-y-4">
-                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="pageId">معرّف الصفحة (Page ID)</label>
-                         <input type="text" id="settingsPageId" class="w-full p-3">
-                     </div>
-                     <div>
-                         <label class="block text-sm font-medium text-gray-700 mb-1" data-translate-key="accessToken">توكن الوصول (Access Token)</label>
-                         <input type="password" id="settingsAccessToken" class="w-full p-3">
-                     </div>
-                     <div class="flex justify-end pt-4">
-                         <button id="saveSettingsButton" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold" data-translate-key="saveAndReconnect">حفظ والاتصال</button>
-                     </div>
-                 </div>
-             </div>
-         </div>
-    </template>
-    
-    <div id="customModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-[100] backdrop-blur-sm p-4">
-        <div id="modalContent" class="card w-full max-w-md p-6 fade-in">
-            <h3 id="modalTitle" class="text-xl font-bold mb-4 text-gray-800"></h3>
-            <p id="modalDescription" class="text-gray-600 mb-4"></p>
-            <div id="modalInputContainer" class="space-y-4"></div>
-            <div id="modalError" class="hidden mt-2 p-3 bg-red-100/50 text-red-700 rounded-lg text-sm"></div>
-            <div class="flex justify-end space-x-3 rtl:space-x-reverse mt-6">
-                <button id="modalCancelButton" class="px-6 py-2 bg-gray-200/50 text-gray-800 rounded-lg font-semibold hover:bg-gray-300/50 transition">إلغاء</button>
-                <button id="modalConfirmButton" class="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition flex items-center justify-center min-w-[80px]">تأكيد</button>
-            </div>
-        </div>
+  <!-- Templates -->
+  <template id="tpl-dashboard">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="card p-6"><p class="text-gray-500">إجمالي الجمهور</p><p id="statTotal" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card p-6"><p class="text-gray-500">الحملات المرسلة</p><p id="statSent" class="text-3xl font-bold mt-2">0</p></div>
+      <div class="card p-6"><p class="text-gray-500">معدل النجاح</p><p id="statRate" class="text-3xl font-bold mt-2">0%</p></div>
     </div>
+  </template>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, onSnapshot, query, where, updateDoc, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-        
-        // *** IMPORTANT ***
-        // This version removes Firebase Authentication entirely and uses a very simple local login.
-        // Credentials: username = 'admin', password = 'mO..012812' (DO NOT use in production).
+  <template id="tpl-audience">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-4">
+        <div class="glass p-4 flex items-center justify-between">
+          <div class="font-bold">مركز التحكم بالجمهور</div>
+          <div class="flex items-center gap-3">
+            <span class="text-gray-600">المجموع: <b id="audCount">0</b></span>
+            <button id="btnFetch" class="px-4 py-2 bg-blue-600 text-white rounded-lg">بدء السحب</button>
+          </div>
+        </div>
+        <div class="glass p-0">
+          <table class="w-full">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr><th class="p-3 w-10"></th><th class="p-3 text-right">المستخدم</th><th class="p-3 text-right">ID</th></tr>
+            </thead>
+            <tbody id="audTable" class="divide-y"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="font-bold mb-2">قوائم الجمهور المحفوظة</div>
+        <div class="space-y-2" id="audSaved"></div>
+        <div class="pt-3">
+          <button id="btnSaveAud" class="px-4 py-2 bg-yellow-500 text-white rounded-lg disabled:opacity-50">حفظ المحددين</button>
+        </div>
+      </div>
+    </div>
+  </template>
 
-        const translations = {
-            ar: { accountSettings: "إعدادات الحساب", welcomeMessage: "مرحباً بك. قم بربط صفحتك للبدء.", connectButton: "اتصال آمن", connecting: "جاري الاتصال...", connectError: "فشل الاتصال:", navDashboard: "لوحة المعلومات", navAudience: "الجمهور", navContent: "المحتوى", navCampaigns: "إنشاء حملة", navReports: "التقارير", navSettings: "الإعدادات", totalAudience: "إجمالي الجمهور", campaignsSent: "الحملات المرسلة", successRate: "معدل النجاح", audienceControlCenter: "مركز التحكم بالجمهور", total: "المجموع", startFetch: "بدء السحب", pause: "إيقاف مؤقت", resume: "استئناف", stop: "إيقاف", copyIds: "نسخ IDs", exportTxt: "حفظ IDs (.txt)", exportCsv: "تصدير (.csv)", selected: "المحدد", createCampaignForSelected: "إنشاء حملة للمحددين", user: "مستخدم", connectionSettings: "إعدادات الاتصال", pageId: "معرّف الصفحة", accessToken: "توكن الوصول", saveAndReconnect: "حفظ والاتصال", dangerZone: "منطقة الخطر", disconnectWarning: "سيؤدي قطع الاتصال إلى مسح بياناتك المحفوظة.", disconnect: "قطع الاتصال", saveAudience: "حفظ الجمهور", noSavedAudiences: "لا توجد قوائم محفوظة بعد.", chooseAudience: "1. اختر الجمهور", sendingControls: "3. التحكم بالإرسال", safetyDelay: "الفاصل الزمني (ثواني)", sendCampaign: "إرسال الحملة", sendingList: "قائمة الإرسال", status: "الحالة", imageLibrary: "مكتبة الصور", imageName: "اسم الصورة", uploadImage: "رفع صورة", saveImage: "حفظ الصورة", savedImages: "الصور المحفوظة", noSavedImages: "لا توجد صور محفوظة بعد.", captionLibrary: "مكتبة النصوص", captionName: "اسم النص", caption: "النص", saveCaption: "حفظ النص", savedCaptions: "النصوص المحفوظة", noSavedCaptions: "لا توجد نصوص محفوظة بعد.", step1: "الخطوة 1: اختر جمهورك", step2: "الخطوة 2: جهز رسالتك", step3: "الخطوة 3: إعدادات الإرسال", chooseSavedImage: "اختر صورة محفوظة", orImageUrl: "أو أدخل رابط صورة", chooseSavedCaption: "اختر نصًا محفوظًا", orWriteCaption: "أو اكتب رسالتك", campaignQueued: "تمت جدولة الحملة بنجاح!", campaignQueuedMsg: "تم إرسال حملتك إلى الخادم للمعالجة.", errorTitle: "خطأ", selectAudienceError: "الرجاء اختيار جمهور أولاً قبل إرسال الحملة.", emptyCampaignError: "لا يمكن إرسال حملة فارغة. الرجاء كتابة رسالة أو إضافة رابط صورة.", emptyAudienceError: "الجمهور الذي اخترته فارغ. لا يوجد مستخدمون للإرسال إليهم.", noReports: "لا توجد تقارير حملات لعرضها.", campaignName: "اسم الحملة", enterCampaignName: "أدخل اسمًا لهذه الحملة.", statusPending: "قيد الانتظار", statusInProgress: "جاري الإرسال", statusPaused: "متوقفة مؤقتاً", statusStopped: "متوقفة", statusCompleted: "مكتملة", sent: "تم الإرسال", failed: "فشل", of: "من" }
-        };
+  <template id="tpl-content">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="glass p-4">
+        <div class="font-bold mb-3">مكتبة الصور</div>
+        <div class="space-y-3">
+          <input id="imgName" class="w-full p-2 border rounded" placeholder="اسم الصورة" />
+          <input id="imgFile" type="file" accept="image/*" />
+          <button id="btnSaveImg" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ الصورة</button>
+        </div>
+        <div id="imgList" class="mt-4 space-y-2"></div>
+      </div>
+      <div class="glass p-4">
+        <div class="font-bold mb-3">مكتبة النصوص</div>
+        <div class="space-y-3">
+          <input id="capName" class="w-full p-2 border rounded" placeholder="اسم النص" />
+          <textarea id="capText" class="w-full p-2 border rounded h-28" placeholder="النص"></textarea>
+          <button id="btnSaveCap" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ النص</button>
+        </div>
+        <div id="capList" class="mt-4 space-y-2"></div>
+      </div>
+    </div>
+  </template>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            let db, storage;
-            const state = { 
-                pageId: null, accessToken: null, pageName: null,
-                users: new Map(), savedAudiences: new Map(), savedImages: new Map(), savedCaptions: new Map(),
-                selectedUsers: new Set(), isFetching: false, isFetchPaused: false, 
-                currentLang: 'ar', nextFetchUrl: null, userId: null, appId: 'linux-campaign',
-                campaignDraft: { audience: '', image: '', caption: '', imageUrl: '', messageContent: '', delay: 5, campaignName: '' },
-                listeners: new Map()
-            };
-            
-            const mainApp = document.getElementById('mainApp');
-            const loginOverlay = document.getElementById('loginOverlay');
-            const mainContentContainer = document.getElementById('mainContentContainer');
-            const pageTitle = document.getElementById('pageTitle');
-            const navItems = document.querySelectorAll('.nav-item');
-            const loginError = document.getElementById('loginError');
+  <template id="tpl-campaigns">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="glass p-4 space-y-4">
+        <div>
+          <label class="block text-sm font-medium">اختر جمهورك</label>
+          <select id="ddAudience" class="w-full p-2 border rounded"></select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">الصورة</label>
+          <select id="ddImage" class="w-full p-2 border rounded"></select>
+          <input id="imgUrl" class="w-full p-2 border rounded mt-2" placeholder="أو أدخل رابط صورة"/>
+        </div>
+        <div>
+          <label class="block text-sm font-medium">النص</label>
+          <select id="ddCaption" class="w-full p-2 border rounded"></select>
+          <textarea id="msgText" class="w-full p-2 border rounded mt-2 h-28" placeholder="أو اكتب رسالتك"></textarea>
+        </div>
+        <div class="flex items-end gap-3">
+          <div>
+            <label class="block text-sm font-medium">الفاصل (ثانية)</label>
+            <input id="delay" type="number" value="5" min="1" class="w-28 p-2 border rounded" />
+          </div>
+          <button id="btnStart" class="px-6 py-3 bg-blue-600 text-white rounded-lg">إرسال الحملة</button>
+        </div>
+      </div>
+      <div class="glass p-4">
+        <div class="font-bold">قائمة الإرسال (<span id="targetCount">0</span>)</div>
+        <div id="sendList" class="mt-3 space-y-2 max-h-[50vh] overflow-y-auto"></div>
+      </div>
+    </div>
+  </template>
 
-            // Firestore paths use state.userId; we'll use a fixed id for this simple login
-            function getUserSettingsDoc() { return doc(db, `artifacts/${state.appId}/users/${state.userId}/settings/main`); }
-            function getImagesCollection() { return collection(db, `artifacts/${state.appId}/users/${state.userId}/images`); }
-            function getCaptionsCollection() { return collection(db, `artifacts/${state.appId}/users/${state.userId}/captions`); }
-            function getCampaignsCollection() { return collection(db, `artifacts/${state.appId}/public/data/campaigns`); }
-            function getAudienceListsCollection() { return collection(db, `artifacts/${state.appId}/public/data/audience-lists`); }
+  <template id="tpl-reports">
+    <div id="reportsWrap" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <p id="noReports" class="hidden text-center text-gray-500 mt-8">لا توجد تقارير بعد.</p>
+  </template>
 
-            function showModal({ title, description, input, confirmText = 'تأكيد', cancelText = 'إلغاء', hideCancel = false, onConfirm }) {
-                const modal = document.getElementById('customModal');
-                const titleEl = document.getElementById('modalTitle');
-                const descEl = document.getElementById('modalDescription');
-                const inputContainer = document.getElementById('modalInputContainer');
-                const confirmButton = document.getElementById('modalConfirmButton');
-                const cancelButton = document.getElementById('modalCancelButton');
-                const errorEl = document.getElementById('modalError');
-                titleEl.textContent = title;
-                descEl.textContent = description || '';
-                descEl.style.display = description ? 'block' : 'none';
-                errorEl.classList.add('hidden');
-                inputContainer.innerHTML = '';
-                if (input) {
-                    const inputEl = document.createElement('input');
-                    inputEl.type = 'text';
-                    inputEl.id = 'modal-input';
-                    inputEl.placeholder = input.placeholder || '';
-                    inputEl.value = input.value || '';
-                    inputContainer.appendChild(inputEl);
-                }
-                confirmButton.textContent = confirmText;
-                cancelButton.textContent = cancelText;
-                cancelButton.style.display = hideCancel ? 'none' : 'inline-flex';
-                const newConfirmButton = confirmButton.cloneNode(true);
-                confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
-                const newCancelButton = cancelButton.cloneNode(true);
-                cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
-                const closeModal = () => modal.classList.add('hidden');
-                newConfirmButton.onclick = async () => {
-                    if (!onConfirm) { closeModal(); return; }
-                    const inputValue = document.getElementById('modal-input')?.value;
-                    const originalButtonHTML = newConfirmButton.innerHTML;
-                    try {
-                        newConfirmButton.innerHTML = `<div class="loader"></div>`;
-                        newConfirmButton.disabled = true;
-                        await onConfirm(inputValue);
-                        closeModal();
-                    } catch(e) {
-                        errorEl.textContent = e.message;
-                        errorEl.classList.remove('hidden');
-                    } finally {
-                        newConfirmButton.innerHTML = originalButtonHTML;
-                        newConfirmButton.disabled = false;
-                    }
-                };
-                newCancelButton.onclick = closeModal;
-                modal.classList.remove('hidden');
-                document.getElementById('modal-input')?.focus();
-            }
+  <template id="tpl-settings">
+    <div class="max-w-xl space-y-4">
+      <div class="glass p-6">
+        <div class="font-bold text-lg mb-3">إعدادات الاتصال</div>
+        <div class="space-y-3">
+          <input id="pageId" class="w-full p-2 border rounded" placeholder="Page ID" />
+          <input id="accessToken" class="w-full p-2 border rounded" placeholder="Page Access Token" />
+          <button id="btnConnect" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حفظ والاتصال</button>
+        </div>
+      </div>
+      <div class="glass p-6">
+        <div class="font-bold mb-2">جلسة المستخدم</div>
+        <div class="flex items-center gap-3">
+          <span>admin</span>
+          <button id="btnLogout" class="px-4 py-2 bg-gray-700 text-white rounded-lg">تسجيل الخروج</button>
+        </div>
+      </div>
+    </div>
+  </template>
 
-            function setupListeners() {
-                if (!state.userId) return;
-                stopListeners();
-                const collections = {
-                    audiences: getAudienceListsCollection(),
-                    images: getImagesCollection(),
-                    captions: getCaptionsCollection(),
-                    campaigns: query(getCampaignsCollection(), where("userId", "==", state.userId))
-                };
-                for (const [key, refCol] of Object.entries(collections)) {
-                    const unsub = onSnapshot(refCol, (snapshot) => {
-                        if (key === 'audiences') {
-                            state.savedAudiences.clear();
-                            snapshot.forEach(doc => state.savedAudiences.set(doc.id, doc.data()));
-                            if (document.getElementById('saved-audiences-list')) renderSavedAudiences();
-                        } else if (key === 'images') {
-                            state.savedImages.clear();
-                            snapshot.forEach(doc => state.savedImages.set(doc.id, doc.data()));
-                            if (document.getElementById('saved-images-list')) renderSavedImages();
-                        } else if (key === 'captions') {
-                            state.savedCaptions.clear();
-                            snapshot.forEach(doc => state.savedCaptions.set(doc.id, doc.data()));
-                            if (document.getElementById('saved-captions-list')) renderSavedCaptions();
-                        } else if (key === 'campaigns') {
-                            if (document.getElementById('campaign-reports-list')) renderCampaignReports(snapshot.docs);
-                        }
-                    });
-                    state.listeners.set(key, unsub);
-                }
-            }
+  <div id="modal" class="hidden fixed inset-0 bg-black/50 z-[60] items-center justify-center">
+    <div class="glass p-6 max-w-md w-full">
+      <h4 id="mTitle" class="font-bold text-lg mb-2"></h4>
+      <p id="mMsg" class="text-gray-700 whitespace-pre-wrap"></p>
+      <div class="text-left mt-4"><button id="mOk" class="px-4 py-2 bg-blue-600 text-white rounded-lg">حسنًا</button></div>
+    </div>
+  </div>
 
-            function stopListeners() {
-                state.listeners.forEach(unsub => unsub());
-                state.listeners.clear();
-            }
-            
-            async function handleConnect(pageId, accessToken) {
-                const settingsSaveButton = document.getElementById('saveSettingsButton');
-                if(settingsSaveButton) {
-                     settingsSaveButton.disabled = true;
-                     settingsSaveButton.innerHTML = `<div class="loader"></div>`;
-                }
-                try {
-                    const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name,picture.type(small)&access_token=${accessToken}`);
-                    const data = await res.json();
-                    
-                    if (!res.ok) {
-                        throw new Error(data.error?.message || `Request failed with status ${res.status}`);
-                    }
-                    
-                    await setDoc(getUserSettingsDoc(), { pageId, accessToken });
-                    Object.assign(state, { pageId, accessToken, pageName: data.name });
-                    
-                    document.getElementById('pageName').textContent = state.pageName;
-                    document.querySelector('#pageName + span')?.classList.replace('bg-red-500', 'bg-green-500');
-                    document.getElementById('disconnected-banner')?.classList.add('hidden');
-                    
-                    setupListeners();
-                    if (window.location.hash.endsWith('settings')) {
-                         showModal({ title: "تم الاتصال", description: `متصل الآن بصفحة ${data.name}.`, confirmText: "حسنًا", hideCancel: true });
-                    } else {
-                         navigate('dashboard');
-                    }
-                } catch (e) {
-                    console.error("Connection failed:", e);
-                    
-                    let userMessage = e.message;
-                    if (e.message.includes("Invalid OAuth access token")) {
-                        userMessage = "توكن الوصول الذي أدخلته غير صالح أو انتهت صلاحيته. الرجاء التحقق منه والمحاولة مرة أخرى.";
-                    } else if (e.message.includes("Permissions error")) {
-                        userMessage = "خطأ في الصلاحيات. تأكد من أن التوكن لديه الصلاحيات المطلوبة (مثل pages_messaging و pages_read_engagement).";
-                    } else if (e.message.includes("Unsupported get request") || e.message.includes("does not exist")) {
-                        userMessage = "لا يمكن العثور على الصفحة. الرجاء التحقق من 'معرف الصفحة' (Page ID) والتأكد من أنه صحيح.";
-                    }
+  <script>
+    // ====== Local state (no Firebase)
+    const LS = {
+      get: (k, d) => { try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch{ return d } },
+      set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+      del: (k) => localStorage.removeItem(k)
+    };
+    const ST = {
+      connected: false,
+      pageId: LS.get('lc_pageId', null),
+      token:  LS.get('lc_token', null),
+      users:  LS.get('lc_users', []),       // [{id,name,picture}]
+      images: LS.get('lc_images', []),      // [{id,name,url(Base64)}]
+      captions: LS.get('lc_captions', []),  // [{id,name,text}]
+      audiences: LS.get('lc_audiences', []),// [{id,name,userIds:[]}]
+      campaigns: LS.get('lc_campaigns', []),
+      selected: new Set(),
+      sending: {running:false,paused:false,idx:0,targets:[],job:null}
+    };
 
-                    showModal({
-                        title: "فشل الاتصال",
-                        description: userMessage,
-                        confirmText: "حسنًا",
-                        hideCancel: true
-                    });
-                } finally {
-                    if(settingsSaveButton) {
-                         settingsSaveButton.disabled = false;
-                         settingsSaveButton.innerHTML = `<span data-translate-key="saveAndReconnect">${translations[state.currentLang].saveAndReconnect}</span>`;
-                    }
-                }
-            }
-            
-            function enterDisconnectedState() {
-                state.pageId = null;
-                state.accessToken = null;
-                state.pageName = 'غير متصل';
-                document.getElementById('pageName').textContent = state.pageName;
-                document.querySelector('#pageName + span')?.classList.replace('bg-green-500', 'bg-red-500');
-                document.getElementById('disconnected-banner')?.classList.remove('hidden');
-                stopListeners();
-                navigate('dashboard');
-            }
+    // ====== Helpers/UI
+    const $  = (s, p=document) => p.querySelector(s);
+    const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
+    function toast(title, msg){
+      $('#mTitle').textContent = title; $('#mMsg').textContent = msg||'';
+      $('#modal').classList.remove('hidden'); $('#mOk').onclick = ()=>$('#modal').classList.add('hidden');
+    }
+    function setConnectedUI(yes, name){
+      $('#pageName').textContent = yes ? (name||'متصل') : 'غير متصل';
+      $('#statusDot').classList.toggle('bg-green-500', yes);
+      $('#statusDot').classList.toggle('bg-red-500', !yes);
+      $('#bannerDisconnected').classList.toggle('hidden', yes);
+    }
 
-            function setLanguage(lang) {
-                state.currentLang = lang;
-                document.documentElement.lang = lang; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-                document.querySelectorAll('[data-translate-key]').forEach(el => {
-                    const key = el.dataset.translateKey;
-                    if (translations[lang]?.[key]) el.textContent = translations[lang][key];
-                });
-            }
+    // ====== Login (local only)
+    function doLogin(){
+      const u = $('#adminUser').value.trim();
+      const p = $('#adminPass').value.trim();
+      if(u==='admin' && p==='mO..012842'){
+        localStorage.setItem('lc_logged','1');
+        $('#loginOverlay').classList.add('hidden');
+        $('#app').classList.remove('hidden');
+        initAfterLogin();
+      }else{
+        $('#loginError').classList.remove('hidden');
+      }
+    }
 
-            function navigate(view, context = {}) {
-                window.location.hash = view;
-                navItems.forEach(item => item.classList.remove('active'));
-                const activeNavItem = document.getElementById(`nav${view.charAt(0).toUpperCase() + view.slice(1)}`);
-                if(activeNavItem) activeNavItem.classList.add('active');
-                
-                const titleKey = `nav${view.charAt(0).toUpperCase() + view.slice(1)}`;
-                pageTitle.textContent = translations[state.currentLang][titleKey] || '';
-                
-                const template = document.getElementById(`${view}-template`);
-                if (template) {
-                    mainContentContainer.innerHTML = template.innerHTML;
-                    const viewInitializers = {
-                        dashboard: initDashboardPage, audience: initAudiencePage, content: initContentPage,
-                        campaigns: () => initCampaignsPage(context), reports: initReportsPage, settings: initSettingsPage,
-                    };
-                    viewInitializers[view]?.();
-                }
-            }
-            
-            function initDashboardPage(){ document.getElementById('totalUsersStat').textContent = state.users.size; }
-            
-            function initAudiencePage() {
-                document.getElementById('fetchUsersButton').addEventListener('click', handleFetchButtonClick);
-                document.getElementById('stopFetchButton').addEventListener('click', stopFetch);
-                document.getElementById('start-campaign-from-audience')?.addEventListener('click', () => navigate('campaigns', { fromAudience: true }) );
-                document.getElementById('save-audience-button')?.addEventListener('click', saveAudience);
-                renderAudienceTable();
-                renderSavedAudiences();
-            }
+    // ====== Router/Views
+    const views = {
+      dashboard(root){
+        root.innerHTML = $('#tpl-dashboard').innerHTML;
+        $('#statTotal').textContent = ST.users.length;
+        const sent = ST.campaigns.reduce((a,c)=>a+(c.successCount||0),0);
+        const total= ST.campaigns.reduce((a,c)=>a+((c.successCount||0)+(c.failureCount||0)),0);
+        $('#statSent').textContent = sent;
+        $('#statRate').textContent = total? Math.round((sent/total)*100)+'%':'0%';
+      },
+      audience(root){
+        root.innerHTML = $('#tpl-audience').innerHTML;
+        $('#audCount').textContent = ST.users.length;
+        renderAudienceTable();
+        $('#btnFetch').onclick = fetchUsers;
+        $('#btnSaveAud').onclick = saveSelectedAudience;
+      },
+      content(root){
+        root.innerHTML = $('#tpl-content').innerHTML;
+        $('#btnSaveImg').onclick = saveImage;
+        $('#btnSaveCap').onclick = saveCaption;
+        renderImgs(); renderCaps();
+      },
+      campaigns(root){
+        root.innerHTML = $('#tpl-campaigns').innerHTML;
+        fillCampaignDropdowns();
+        $('#btnStart').onclick = startCampaign;
+      },
+      reports(root){
+        root.innerHTML = $('#tpl-reports').innerHTML;
+        renderReports();
+      },
+      settings(root){
+        root.innerHTML = $('#tpl-settings').innerHTML;
+        $('#pageId').value = ST.pageId || '';
+        $('#accessToken').value = ST.token || '';
+        $('#btnConnect').onclick = () => connect($('#pageId').value.trim(), $('#accessToken').value.trim());
+        $('#btnLogout').onclick  = () => { localStorage.removeItem('lc_logged'); location.reload(); };
+      }
+    };
 
-            function initContentPage() {
-                document.getElementById('save-image-button').addEventListener('click', saveImage);
-                document.getElementById('save-caption-button').addEventListener('click', saveCaption);
-                renderSavedImages();
-                renderSavedCaptions();
-            }
-            
-            function initSettingsPage() {
-                document.getElementById('userEmail').textContent = 'admin';
-                document.getElementById('signOutButton').addEventListener('click', () => {
-                    localStorage.removeItem('isLoggedIn');
-                    state.userId = null;
-                    mainApp.classList.add('hidden');
-                    loginOverlay.classList.remove('hidden');
-                });
-                document.getElementById('settingsPageId').value = state.pageId || '';
-                document.getElementById('settingsAccessToken').value = state.accessToken || '';
-                document.getElementById('saveSettingsButton').addEventListener('click', () => {
-                    const newPageId = document.getElementById('settingsPageId').value.trim();
-                    const newAccessToken = document.getElementById('settingsAccessToken').value.trim();
-                    handleConnect(newPageId, newAccessToken);
-                });
-            }
-            
-            function initCampaignsPage(context) {
-                const audienceDropdown = document.getElementById('audience-select-dropdown');
-                const imageDropdown = document.getElementById('load-image-dropdown');
-                const captionDropdown = document.getElementById('load-caption-dropdown');
-                if (context.fromAudience && state.selectedUsers.size > 0) audienceDropdown.add(new Option(`${translations[state.currentLang].createCampaignForSelected} (${state.selectedUsers.size})`, '__selected__'));
-                state.savedAudiences.forEach((audienceData, docId) => {
-                    audienceDropdown.add(new Option(`${audienceData.name} (${audienceData.userIds.length})`, docId));
-                });
-                state.savedImages.forEach((img, docId) => imageDropdown.add(new Option(img.name, docId)));
-                state.savedCaptions.forEach((cap, docId) => captionDropdown.add(new Option(cap.name, docId)));
-                document.getElementById('send-campaign-button').addEventListener('click', startCampaign);
-                ['audience-select-dropdown', 'load-image-dropdown', 'load-caption-dropdown', 'imageUrl', 'messageContent', 'send-delay', 'campaignNameInput'].forEach(id => {
-                    document.getElementById(id)?.addEventListener(id.includes('select') ? 'change' : 'input', saveCampaignDraft);
-                });
-                imageDropdown.addEventListener('change', e => {
-                    const img = state.savedImages.get(e.target.value);
-                    if (img) document.getElementById('imageUrl').value = img.url;
-                    saveCampaignDraft();
-                });
-                captionDropdown.addEventListener('change', e => {
-                    const cap = state.savedCaptions.get(e.target.value);
-                    if (cap) document.getElementById('messageContent').value = cap.text;
-                    saveCampaignDraft();
-                });
-                audienceDropdown.addEventListener('change', updateCampaignAudience);
-                loadCampaignDraft();
-                if (context.fromAudience && state.selectedUsers.size > 0) {
-                    audienceDropdown.value = '__selected__';
-                }
-                updateCampaignAudience();
-                saveCampaignDraft();
-            }
-            
-            function initReportsPage() { /* Listener handles this */ }
+    function render(){
+      const v = (location.hash||'#dashboard').slice(1);
+      $$('.nav-item').forEach(a=>a.classList.remove('active'));
+      $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.classList.add('active');
+      $('#pageTitle').textContent = $('#nav'+v.charAt(0).toUpperCase()+v.slice(1))?.textContent || '';
+      views[v]?.($('#viewRoot'));
+    }
+    window.addEventListener('hashchange', render);
 
-            function renderCampaignReports(docs) {
-                const container = document.getElementById('campaign-reports-list');
-                const noReportsMsg = document.getElementById('no-reports-message');
-                if (!container || !noReportsMsg) return;
-                noReportsMsg.classList.toggle('hidden', docs.length > 0);
-                container.innerHTML = '';
-                docs.sort((a,b) => b.data().createdAt - a.data().createdAt).forEach(doc => {
-                    const campaign = { id: doc.id, ...doc.data() };
-                    const total = campaign.audience.length;
-                    const sent = campaign.successCount || 0;
-                    const failed = campaign.failureCount || 0;
-                    const progress = total > 0 ? ((sent + failed) / total) * 100 : 0;
-                    const statusKey = `status${campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}`;
-                    const statusText = translations[state.currentLang][statusKey] || campaign.status;
-                    const card = document.createElement('div');
-                    card.className = 'card p-4 flex flex-col space-y-3';
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <h4 class="font-bold text-lg text-gray-800">${campaign.campaignName}</h4>
-                            <span class="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-800">${statusText}</span>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-sm font-semibold text-gray-600 mb-1">
-                                <span>التقدم</span>
-                                <span>${sent + failed} ${translations[state.currentLang].of} ${total}</span>
-                            </div>
-                            <progress class="w-full" value="${progress}" max="100"></progress>
-                            <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                <span>✅ ${translations[state.currentLang].sent}: ${sent}</span>
-                                <span>❌ ${translations[state.currentLang].failed}: ${failed}</span>
-                            </div>
-                        </div>
-                        <div class="flex justify-end items-center space-x-2 rtl:space-x-reverse pt-2">
-                            ${campaign.status === 'in-progress' || campaign.status === 'paused' ? `
-                                <button data-action="pause" data-id="${campaign.id}" class="pause-campaign-btn px-4 py-1.5 bg-yellow-500 text-white rounded-lg text-sm font-semibold">${campaign.status === 'paused' ? translations[state.currentLang].resume : translations[state.currentLang].pause}</button>
-                                <button data-action="stop" data-id="${campaign.id}" class="stop-campaign-btn px-4 py-1.5 bg-red-600 text-white rounded-lg text-sm font-semibold">${translations[state.currentLang].stop}</button>
-                            ` : ''}
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-                container.querySelectorAll('.pause-campaign-btn').forEach(btn => btn.addEventListener('click', toggleCampaignPause));
-                container.querySelectorAll('.stop-campaign-btn').forEach(btn => btn.addEventListener('click', stopCampaign));
-            }
+    // ====== Connect to Graph
+    async function connect(pageId, token){
+      if(!pageId || !token) return toast('خطأ','أدخل Page ID و Access Token');
+      try{
+        const res = await fetch(`https://graph.facebook.com/v20.0/${pageId}?fields=name,picture.type(small)&access_token=${encodeURIComponent(token)}`);
+        const data = await res.json();
+        if(!res.ok || data.error) throw new Error(data.error?.message || ('HTTP '+res.status));
+        ST.pageId = pageId; ST.token = token; ST.connected = true;
+        LS.set('lc_pageId', pageId); LS.set('lc_token', token);
+        setConnectedUI(true, data.name);
+        toast('تم الاتصال', `متصل الآن بصفحة ${data.name}`);
+      }catch(e){
+        setConnectedUI(false);
+        toast('فشل الاتصال', e.message);
+      }
+    }
 
-            function loadCampaignDraft() {
-                const savedDraftJSON = sessionStorage.getItem('phoenix_campaignDraft');
-                if (!savedDraftJSON) return;
-                const draft = JSON.parse(savedDraftJSON);
-                state.campaignDraft = draft;
-                document.getElementById('audience-select-dropdown').value = draft.audience || '';
-                document.getElementById('load-image-dropdown').value = draft.image || '';
-                document.getElementById('load-caption-dropdown').value = draft.caption || '';
-                document.getElementById('imageUrl').value = draft.imageUrl || '';
-                document.getElementById('messageContent').value = draft.messageContent || '';
-                document.getElementById('send-delay').value = draft.delay || 5;
-                document.getElementById('campaignNameInput').value = draft.campaignName || '';
-            }
-             function saveCampaignDraft() {
-                state.campaignDraft = {
-                    audience: document.getElementById('audience-select-dropdown')?.value,
-                    image: document.getElementById('load-image-dropdown')?.value,
-                    caption: document.getElementById('load-caption-dropdown')?.value,
-                    imageUrl: document.getElementById('imageUrl')?.value,
-                    messageContent: document.getElementById('messageContent')?.value,
-                    delay: document.getElementById('send-delay')?.value,
-                    campaignName: document.getElementById('campaignNameInput')?.value,
-                };
-                sessionStorage.setItem('phoenix_campaignDraft', JSON.stringify(state.campaignDraft));
-            }
-            
-            async function startCampaign() {
-                if (!state.pageId) { showModal({ title: "غير متصل", description: "الرجاء الاتصال بصفحة أولاً من الإعدادات.", confirmText: "حسنًا", hideCancel: true }); return; }
-                const campaignName = document.getElementById('campaignNameInput').value.trim();
-                const message = document.getElementById('messageContent').value.trim();
-                const imageUrl = document.getElementById('imageUrl').value.trim();
-                const delay = parseInt(document.getElementById('send-delay').value, 10);
-                const audienceId = document.getElementById('audience-select-dropdown').value;
-                const errorTitle = translations[state.currentLang].errorTitle;
-                if (!campaignName) { showModal({ title: errorTitle, description: "الرجاء إدخال اسم للحملة.", confirmText: "حسنًا", hideCancel: true }); return; }
-                if (!audienceId) { showModal({ title: errorTitle, description: translations[state.currentLang].selectAudienceError, confirmText: "حسنًا", hideCancel: true }); return; }
-                if (!message && !imageUrl) { showModal({ title: errorTitle, description: translations[state.currentLang].emptyCampaignError, confirmText: "حسنًا", hideCancel: true }); return; }
-                const audienceData = state.savedAudiences.get(audienceId);
-                let targetIds = audienceId === '__selected__' ? Array.from(state.selectedUsers) : (audienceData ? audienceData.userIds : []) || [];
-                if (targetIds.length === 0) { showModal({ title: errorTitle, description: translations[state.currentLang].emptyAudienceError, confirmText: "حسنًا", hideCancel: true }); return; }
-                const campaignJob = { campaignName, audience: targetIds, message, imageUrl, delay, pageId: state.pageId, accessToken: state.accessToken, status: 'pending', createdAt: Date.now(), userId: state.userId, successCount: 0, failureCount: 0 };
-                const button = document.getElementById('send-campaign-button');
-                try {
-                    button.disabled = true;
-                    await addDoc(getCampaignsCollection(), campaignJob);
-                    showModal({ title: translations[state.currentLang].campaignQueued, description: translations[state.currentLang].campaignQueuedMsg, confirmText: "حسنًا", hideCancel: true });
-                    navigate('reports');
-                } catch (e) {
-                    console.error("Failed to queue campaign:", e);
-                    showModal({ title: "خطأ", description: e.message, confirmText: "حسنًا", hideCancel: true });
-                } finally {
-                    button.disabled = false;
-                }
-            }
+    // ====== Audience
+    function renderAudienceTable(){
+      const body = $('#audTable'); body.innerHTML='';
+      ST.users.forEach(u=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td class="p-3"><input type="checkbox" data-id="${u.id}"></td>
+                        <td class="p-3"><div class="flex items-center gap-2">
+                          <img src="${u.picture||'https://placehold.co/40'}" class="w-8 h-8 rounded"/><b>${u.name||'User'}</b></div></td>
+                        <td class="p-3 font-mono text-gray-600">${u.id}</td>`;
+        body.appendChild(tr);
+      });
+      $('#audCount').textContent = ST.users.length;
+      body.querySelectorAll('input[type=checkbox]').forEach(cb=> cb.onchange = (e)=>{
+        const id = e.target.dataset.id;
+        if(e.target.checked) ST.selected.add(id); else ST.selected.delete(id);
+      });
+    }
 
-            async function toggleCampaignPause(event) {
-                const campaignId = event.target.dataset.id;
-                const campaignRef = doc(getCampaignsCollection(), campaignId);
-                const campaignDoc = await getDoc(campaignRef);
-                if (!campaignDoc.exists()) return;
-                const newStatus = campaignDoc.data().status === 'paused' ? 'in-progress' : 'paused';
-                await updateDoc(campaignRef, { status: newStatus });
-            }
+    async function fetchUsers(){
+      if(!ST.connected) return toast('غير متصل','ادخل الإعدادات أولاً.');
+      let next = `https://graph.facebook.com/v20.0/${ST.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${encodeURIComponent(ST.token)}`;
+      const seen = new Set(ST.users.map(u=>u.id));
+      try{
+        while(next){
+          const res = await fetch(next);
+          const data = await res.json();
+          if(data.error) throw new Error(data.error.message);
+          (data.data||[]).forEach(conv=>{
+            const u = (conv.participants?.data||[]).find(p=>p.id!==ST.pageId);
+            if(u && !seen.has(u.id)){ seen.add(u.id); ST.users.push({id:u.id, name:u.name, picture:u.picture?.data?.url}); }
+          });
+          next = data.paging?.next;
+          LS.set('lc_users', ST.users);
+          renderAudienceTable();
+        }
+      }catch(e){ toast('خطأ في السحب', e.message); }
+    }
 
-            async function stopCampaign(event) {
-                 const campaignId = event.target.dataset.id;
-                 await updateDoc(doc(getCampaignsCollection(), campaignId), { status: 'stopped' });
-            }
-            
-             function renderSavedAudiences() {
-                const container = document.getElementById('saved-audiences-list');
-                if(!container) return;
-                container.innerHTML = state.savedAudiences.size === 0 ? `<p class="text-gray-500" data-translate-key="noSavedAudiences"></p>` : '';
-                state.savedAudiences.forEach((audienceData, docId) => {
-                    const div = document.createElement('div');
-                    div.className = 'p-3 bg-gray-50/50 rounded-lg flex justify-between items-center';
-                    div.innerHTML = `<div><p class="font-bold">${audienceData.name}</p><p class="text-sm text-gray-500">${audienceData.userIds.length} <span data-translate-key="user"></span></p></div><button class="delete-audience-btn text-red-500 hover:text-red-700 font-bold" data-id="${docId}">X</button>`;
-                    container.appendChild(div);
-                });
-                container.querySelectorAll('.delete-audience-btn').forEach(btn => btn.addEventListener('click', (e) => deleteAudience(e.currentTarget.dataset.id)));
-                setLanguage(state.currentLang);
-            }
-            function renderSavedImages() {
-                const container = document.getElementById('saved-images-list');
-                if(!container) return;
-                container.innerHTML = state.savedImages.size === 0 ? `<p class="text-gray-500" data-translate-key="noSavedImages"></p>` : '';
-                state.savedImages.forEach((img, docId) => {
-                    const div = document.createElement('div');
-                    div.className = 'p-3 bg-gray-50/50 rounded-lg flex justify-between items-center';
-                    div.innerHTML = `<div class="flex items-center"><img src="${img.url}" class="w-10 h-10 rounded-md object-cover ltr:mr-3 rtl:ml-3"><p class="font-bold">${img.name}</p></div><button class="delete-image-btn text-red-500 hover:text-red-700 font-bold" data-id="${docId}">X</button>`;
-                    container.appendChild(div);
-                });
-                container.querySelectorAll('.delete-image-btn').forEach(btn => btn.addEventListener('click', (e) => deleteImage(e.currentTarget.dataset.id)));
-                setLanguage(state.currentLang);
-            }
-            function renderSavedCaptions() {
-                const container = document.getElementById('saved-captions-list');
-                if(!container) return;
-                container.innerHTML = state.savedCaptions.size === 0 ? `<p class="text-gray-500" data-translate-key="noSavedCaptions"></p>` : '';
-                state.savedCaptions.forEach((cap, docId) => {
-                    const div = document.createElement('div');
-                    div.className = 'p-3 bg-gray-50/50 rounded-lg flex justify-between items-center';
-                    div.innerHTML = `<div><p class="font-bold">${cap.name}</p><p class="text-sm text-gray-500 truncate w-40">${cap.text}</p></div><button class="delete-caption-btn text-red-500 hover:text-red-700 font-bold" data-id="${docId}">X</button>`;
-                    container.appendChild(div);
-                });
-                container.querySelectorAll('.delete-caption-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCaption(e.currentTarget.dataset.id)));
-                setLanguage(state.currentLang);
-            }
-            async function saveImage() {
-                const name = document.getElementById('imageName').value.trim();
-                const file = document.getElementById('imageUpload').files[0];
-                if (!name || !file) return;
-                const button = document.getElementById('save-image-button');
-                button.disabled = true;
-                button.innerHTML = `<div class="loader"></div>`;
-                try {
-                    const storageRef = ref(storage, `artifacts/${state.appId}/users/${state.userId}/images/${Date.now()}_${file.name}`);
-                    await uploadBytes(storageRef, file);
-                    const downloadURL = await getDownloadURL(storageRef);
-                    await setDoc(doc(getImagesCollection(), name), { name, url: downloadURL, storagePath: storageRef.fullPath });
-                    document.getElementById('imageName').value = '';
-                    document.getElementById('imageUpload').value = '';
-                } catch (e) { console.error("Image upload failed:", e); }
-                finally { button.disabled = false; button.innerHTML = `<span data-translate-key="saveImage"></span>`; setLanguage(state.currentLang); }
-            }
-            async function deleteImage(docId) {
-                const img = state.savedImages.get(docId);
-                 showModal({ title: "تأكيد الحذف", description: `هل أنت متأكد من حذف الصورة "${img?.name || ''}"؟`, confirmText: "حذف", cancelText: "إلغاء", onConfirm: async () => { if (img && img.storagePath) { await deleteObject(ref(storage, img.storagePath)); } await deleteDoc(doc(getImagesCollection(), docId)); }});
-            }
-            async function saveCaption() {
-                const name = document.getElementById('captionName').value.trim();
-                const text = document.getElementById('captionText').value.trim();
-                if(name && text) {
-                    await setDoc(doc(getCaptionsCollection(), name), { name, text });
-                    document.getElementById('captionName').value = '';
-                    document.getElementById('captionText').value = '';
-                }
-            }
-            async function deleteCaption(docId) {
-                const cap = state.savedCaptions.get(docId);
-                showModal({ title: "تأكيد الحذف", description: `هل أنت متأكد من حذف النص "${cap?.name || ''}"؟`, confirmText: "حذف", cancelText: "إلغاء", onConfirm: async () => { await deleteDoc(doc(getCaptionsCollection(), docId)); }});
-            }
-            async function saveAudience() {
-                if (state.selectedUsers.size === 0) { showModal({ title: "خطأ", description: "الرجاء تحديد مستخدم واحد على الأقل لحفظ الجمهور.", confirmText: "حسنًا", hideCancel: true }); return; }
-                showModal({ title: "حفظ الجمهور", description: "أدخل اسمًا لهذه القائمة لحفظها.", input: { placeholder: "مثال: عملاء مهتمون" }, confirmText: "حفظ", cancelText: "إلغاء", onConfirm: async (audienceName) => { if (!audienceName || audienceName.trim() === '') { throw new Error("الاسم لا يمكن أن يكون فارغاً."); } await addDoc(getAudienceListsCollection(), { name: audienceName.trim(), userIds: Array.from(state.selectedUsers) }); }});
-            }
-            async function deleteAudience(docId) {
-                const audience = state.savedAudiences.get(docId);
-                showModal({ title: "تأكيد الحذف", description: `هل أنت متأكد من حذف قائمة الجمهور "${audience?.name || ''}"؟`, confirmText: "حذف", cancelText: "إلغاء", onConfirm: async () => { await deleteDoc(doc(getAudienceListsCollection(), docId)); }});
-            }
-            function updateCampaignAudience() {
-                const dropdown = document.getElementById('audience-select-dropdown');
-                const listContainer = document.getElementById('campaign-audience-list');
-                const countEl = document.getElementById('campaign-target-count');
-                if (!dropdown || !listContainer || !countEl) return;
-                const audienceId = dropdown.value;
-                const audienceData = state.savedAudiences.get(audienceId);
-                let targetIds = audienceId === '__selected__' ? Array.from(state.selectedUsers) : (audienceData ? audienceData.userIds : []) || [];
-                listContainer.innerHTML = '';
-                targetIds.forEach(id => {
-                    const user = state.users.get(id) || { name: 'Unknown User', id, picture: `https://placehold.co/40x40/E2E8F0/333?text=?` };
-                    const itemDiv = document.createElement('div');
-                    itemDiv.id = `campaign-user-${user.id}`;
-                    itemDiv.className = 'p-3 flex items-center justify-between';
-                    itemDiv.innerHTML = `<div class="flex items-center"><img src="${user.picture}" class="w-8 h-8 rounded-full ltr:mr-3 rtl:ml-3"><span class="font-semibold">${user.name}</span></div><span class="text-sm text-gray-500" data-status="pending">—</span>`;
-                    listContainer.appendChild(itemDiv);
-                });
-                countEl.textContent = targetIds.length;
-            }
-            function handleFetchButtonClick() {
-                if (!state.pageId) { showModal({ title: "غير متصل", description: "الرجاء الاتصال بصفحة أولاً من الإعدادات.", confirmText: "حسنًا", hideCancel: true }); return; }
-                const button = document.getElementById('fetchUsersButton');
-                if (!state.isFetching) {
-                    state.isFetching = true; state.isFetchPaused = false;
-                    if (!state.nextFetchUrl) state.nextFetchUrl = `https://graph.facebook.com/v20.0/${state.pageId}/conversations?fields=participants{name,id,picture.type(square)}&limit=100&access_token=${state.accessToken}`;
-                    button.innerHTML = `<span data-translate-key="pause"></span>`;
-                    document.getElementById('stopFetchButton').classList.remove('hidden');
-                    fetchAllUsers();
-                } else {
-                    state.isFetchPaused = !state.isFetchPaused;
-                    button.innerHTML = `<span data-translate-key="${state.isFetchPaused ? 'resume' : 'pause'}"></span>`;
-                    if (!state.isFetchPaused) fetchAllUsers();
-                }
-                setLanguage(state.currentLang);
-            }
-            function stopFetch() {
-                state.isFetching = false; state.isFetchPaused = false; state.nextFetchUrl = null;
-                document.getElementById('fetchUsersButton').innerHTML = `<span data-translate-key="startFetch"></span>`;
-                document.getElementById('stopFetchButton').classList.add('hidden');
-                setLanguage(state.currentLang);
-            }
-            async function fetchAllUsers() {
-                while (state.nextFetchUrl && state.isFetching && !state.isFetchPaused) {
-                    try {
-                        const response = await fetch(state.nextFetchUrl);
-                        const data = await response.json();
-                        if (data.error) throw new Error(data.error.message);
-                        data.data?.forEach(conv => {
-                            const user = conv.participants?.data?.find(p => p.id !== state.pageId);
-                            if (user && !state.users.has(user.id)) {
-                                const pictureUrl = user.picture?.data?.url ?? `https://placehold.co/40x40/E2E8F0/333?text=${user.name?.charAt(0) ?? "U"}`;
-                                state.users.set(user.id, { name: user.name, id: user.id, picture: pictureUrl });
-                            }
-                        });
-                        document.getElementById('fetch-counter').textContent = state.users.size;
-                        renderAudienceTable();
-                        state.nextFetchUrl = data.paging?.next;
-                    } catch (e) {
-                        showModal({ title: "خطأ في السحب", description: e.message, confirmText: "حسنًا", hideCancel: true });
-                        stopFetch();
-                        break;
-                    }
-                }
-                if (!state.nextFetchUrl && state.isFetching) stopFetch();
-            }
-            function renderAudienceTable() {
-                const tableBody = document.getElementById('audience-table-body');
-                if(!tableBody) return;
-                tableBody.innerHTML = '';
-                for(const user of Array.from(state.users.values())) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td class="p-4"><input type="checkbox" data-id="${user.id}" class="user-checkbox rounded border-gray-300 text-blue-600 shadow-sm"></td><td class="p-4"><div class="flex items-center"><img src="${user.picture}" class="w-10 h-10 rounded-full ltr:mr-3 rtl:ml-3"><span class="font-semibold">${user.name}</span></div></td><td class="p-4 text-gray-500 font-mono">${user.id}</td><td class="p-4 text-sm">✅</td>`;
-                    tableBody.appendChild(row);
-                };
-                wireCheckboxes();
-            }
-            function wireCheckboxes(){
-                const selectAll = document.getElementById('select-all-checkbox');
-                if(selectAll) selectAll.onchange = (e) => {
-                    document.querySelectorAll('.user-checkbox:not(:disabled)').forEach(cb => {
-                        cb.checked = e.target.checked;
-                        if(e.target.checked) state.selectedUsers.add(cb.dataset.id); else state.selectedUsers.delete(cb.dataset.id);
-                    });
-                    updateSelectedUI();
-                };
-                document.querySelectorAll('.user-checkbox').forEach(cb => cb.addEventListener('change', (e) => {
-                    if (e.target.checked) state.selectedUsers.add(e.target.dataset.id); else state.selectedUsers.delete(e.target.dataset.id);
-                    updateSelectedUI();
-                }));
-            }
-            function updateSelectedUI(){
-                const count = state.selectedUsers.size;
-                const panel = document.getElementById('audience-actions');
-                const countSpan = document.getElementById('selected-count');
-                const countBtn = document.getElementById('selected-count-btn');
-                if(countSpan) countSpan.textContent = count;
-                if(countBtn) countBtn.textContent = count;
-                if(panel) panel.classList.toggle('hidden', count === 0);
-            }
+    // ====== Content (localStorage)
+    function renderImgs(){
+      const list = $('#imgList'); list.innerHTML='';
+      ST.images.forEach(img=>{
+        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
+        row.innerHTML = `<div class="flex items-center gap-2">
+            <img src="${img.url}" class="w-10 h-10 rounded object-cover"><b>${img.name}</b></div>
+          <button class="text-red-600" data-id="${img.id}">حذف</button>`;
+        row.querySelector('button').onclick = ()=>{ ST.images = ST.images.filter(x=>x.id!==img.id); LS.set('lc_images', ST.images); renderImgs(); };
+        list.appendChild(row);
+      });
+    }
+    function renderCaps(){
+      const list = $('#capList'); list.innerHTML='';
+      ST.captions.forEach(c=>{
+        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
+        row.innerHTML = `<div><b>${c.name}</b><div class="text-gray-500 text-sm max-w-sm truncate">${c.text}</div></div>
+          <button class="text-red-600" data-id="${c.id}">حذف</button>`;
+        row.querySelector('button').onclick = ()=>{ ST.captions = ST.captions.filter(x=>x.id!==c.id); LS.set('lc_captions', ST.captions); renderCaps(); };
+        list.appendChild(row);
+      });
+    }
+    function saveImage(){
+      const name = $('#imgName').value.trim();
+      const file = $('#imgFile').files[0];
+      if(!name || !file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        ST.images.push({id: crypto.randomUUID(), name, url: reader.result});
+        LS.set('lc_images', ST.images); renderImgs();
+        $('#imgName').value=''; $('#imgFile').value='';
+      };
+      reader.readAsDataURL(file);
+    }
+    function saveCaption(){
+      const name = $('#capName').value.trim();
+      const text = $('#capText').value.trim();
+      if(!name || !text) return;
+      ST.captions.push({id: crypto.randomUUID(), name, text});
+      LS.set('lc_captions', ST.captions); renderCaps();
+      $('#capName').value=''; $('#capText').value='';
+    }
 
-            // ==== Simple local login ====
-            function doLogin() {
-                const u = (document.getElementById('adminUser').value || '').trim();
-                const p = (document.getElementById('adminPass').value || '').trim();
-                if (u === 'admin' && p === 'mO..012812') {
-                    localStorage.setItem('isLoggedIn', '1');
-                    state.userId = 'admin';
-                    loginError.classList.add('hidden');
-                    loginOverlay.classList.add('hidden');
-                    mainApp.classList.remove('hidden');
-                    mainApp.style.display = 'flex';
-                    initAfterLogin();
-                } else {
-                    loginError.classList.remove('hidden');
-                }
-            }
+    // ====== Audiences
+    function renderSavedAudiences(){
+      const box = $('#audSaved'); if(!box) return; box.innerHTML='';
+      ST.audiences.forEach(a=>{
+        const row = document.createElement('div'); row.className='flex items-center justify-between py-1';
+        row.innerHTML = `<div><b>${a.name}</b> <span class="text-gray-500 text-sm">(${a.userIds.length})</span></div>
+                         <button class="text-red-600" data-id="${a.id}">حذف</button>`;
+        row.querySelector('button').onclick = ()=>{ ST.audiences = ST.audiences.filter(x=>x.id!==a.id); LS.set('lc_audiences', ST.audiences); renderSavedAudiences(); };
+        box.appendChild(row);
+      });
+    }
+    function saveSelectedAudience(){
+      const ids = Array.from(ST.selected);
+      if(ids.length===0) return toast('خطأ','حدد مستخدمين أولاً.');
+      const name = prompt('اسم القائمة:'); if(!name) return;
+      ST.audiences.push({id: crypto.randomUUID(), name, userIds: ids});
+      LS.set('lc_audiences', ST.audiences);
+      renderSavedAudiences();
+      ST.selected.clear();
+      toast('تم','تم حفظ القائمة.');
+    }
 
-            function initAfterLogin() {
-                // Init firebase (Firestore/Storage only)
-                const firebaseConfig = {"apiKey":"AIzaSyAboqjO74kRbRr27XBCBujd3BC7d69DdX0","authDomain":"linux-campaign.firebaseapp.com","projectId":"linux-campaign","storageBucket":"linux-campaign.appspot.com","messagingSenderId":"289189226812","appId":"1:289189226812:web:5ee74601f4853c5b6b9639","measurementId":"G-XBVQBCL1GW"};
-                const app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                storage = getStorage(app);
+    // ====== Campaigns (direct browser → Graph)
+    function fillCampaignDropdowns(){
+      const ddA = $('#ddAudience'); ddA.innerHTML = `<option value="">-- اختر جمهورًا --</option>`;
+      ST.audiences.forEach(a=> ddA.add(new Option(`${a.name} (${a.userIds.length})`, a.id)));
+      const ddI = $('#ddImage'); ddI.innerHTML = `<option value="">-- اختر صورة --</option>`;
+      ST.images.forEach(img=> ddI.add(new Option(img.name, img.id)));
+      ddI.onchange = ()=>{ const img = ST.images.find(i=>i.id===ddI.value); if(img) $('#imgUrl').value = img.url; };
+      const ddC = $('#ddCaption'); ddC.innerHTML = `<option value="">-- اختر نصًا --</option>`;
+      ST.captions.forEach(c=> ddC.add(new Option(c.name, c.id)));
+      ddC.onchange = ()=>{ const c = ST.captions.find(x=>x.id===ddC.value); if(c) $('#msgText').value = c.text; };
+      renderSendList([]);
+    }
+    function renderSendList(ids){
+      $('#sendList').innerHTML='';
+      ids.forEach(id=>{
+        const div = document.createElement('div'); div.className='flex items-center justify-between p-2 border rounded';
+        const u = ST.users.find(x=>x.id===id) || {name:'User', picture:'https://placehold.co/40'};
+        div.innerHTML = `<div class="flex items-center gap-2"><img class="w-8 h-8 rounded" src="${u.picture}"><b>${u.name}</b></div>
+                         <span id="st-${id}" class="text-sm text-gray-500">—</span>`;
+        $('#sendList').appendChild(div);
+      });
+      $('#targetCount').textContent = ids.length;
+    }
+    async function startCampaign(){
+      if(!ST.connected) return toast('غير متصل','أدخل الإعدادات أولاً.');
+      const audId = $('#ddAudience').value;
+      const audience = ST.audiences.find(a=>a.id===audId);
+      if(!audience || audience.userIds.length===0) return toast('خطأ','اختر جمهورًا صحيحًا.');
+      const message = $('#msgText').value.trim();
+      const imageUrl = $('#imgUrl').value.trim();
+      if(!message && !imageUrl) return toast('خطأ','أدخل رسالة أو صورة.');
+      const delay = Math.max(1, parseInt($('#delay').value||'5',10));
+      renderSendList(audience.userIds);
+      ST.sending = {running:true, paused:false, idx:0, targets:[...audience.userIds], job:{
+        id: crypto.randomUUID(), name:'Campaign', createdAt: Date.now(), successCount:0, failureCount:0
+      }};
+      await runSender(message, imageUrl, delay);
+    }
+    async function runSender(message, imageUrl, delay){
+      const url = `https://graph.facebook.com/v20.0/me/messages?access_token=${encodeURIComponent(ST.token)}`;
+      while(ST.sending.running && ST.sending.idx < ST.sending.targets.length){
+        const id = ST.sending.targets[ST.sending.idx];
+        $('#st-'+id)?.classList.remove('text-gray-500');
+        $('#st-'+id)?.classList.add('text-yellow-700'); $('#st-'+id).textContent='...';
+        try{
+          const payload = { messaging_type:'RESPONSE', recipient:{id}, message:{} };
+          if(message) payload.message.text = message;
+          if(imageUrl) payload.message.attachment = { type:'image', payload:{ url:imageUrl, is_reusable:true } };
+          const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+          const data = await res.json();
+          if(data.error) throw new Error(data.error.message);
+          ST.sending.job.successCount++;
+          $('#st-'+id).textContent='✅'; $('#st-'+id).className='text-green-700';
+        }catch(e){
+          ST.sending.job.failureCount++;
+          $('#st-'+id).textContent='❌'; $('#st-'+id).className='text-red-700';
+        }
+        ST.sending.idx++;
+        await new Promise(r=>setTimeout(r, delay*1000));
+      }
+      ST.campaigns.push(ST.sending.job);
+      LS.set('lc_campaigns', ST.campaigns);
+      toast('انتهى الإرسال', `تم الإرسال: ${ST.sending.job.successCount}\nفشل: ${ST.sending.job.failureCount}`);
+      render();
+    }
 
-                // Restore saved page connection if exists
-                getDoc(getUserSettingsDoc()).then(snap => {
-                    if (snap.exists() && snap.data().pageId && snap.data().accessToken) {
-                        handleConnect(snap.data().pageId, snap.data().accessToken);
-                    } else {
-                        enterDisconnectedState();
-                    }
-                }).catch(() => enterDisconnectedState());
+    // ====== Reports
+    function renderReports(){
+      const wrap = $('#reportsWrap'); const empty = $('#noReports');
+      wrap.innerHTML=''; if(ST.campaigns.length===0){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      ST.campaigns.slice().reverse().forEach(c=>{
+        const total = (c.successCount||0)+(c.failureCount||0);
+        const card = document.createElement('div'); card.className='glass p-4';
+        card.innerHTML = `<div class="flex items-center justify-between">
+          <b>${c.name||'Campaign'}</b><span class="text-sm">${new Date(c.createdAt).toLocaleString()}</span></div>
+          <div class="mt-2 text-sm text-gray-700">تم: ${c.successCount||0} — فشل: ${c.failureCount||0} — الإجمالي: ${total}</div>`;
+        wrap.appendChild(card);
+      });
+    }
 
-                const view = window.location.hash.replace('#', '') || 'dashboard';
-                navigate(view);
-                setLanguage('ar');
-            }
+    // ====== Boot
+    function initAfterLogin(){
+      setConnectedUI(!!ST.token && !!ST.pageId, null);
+      renderSavedAudiences();
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    }
 
-            document.getElementById('adminLoginBtn').addEventListener('click', doLogin);
-            document.getElementById('adminPass').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    // events
+    $('#adminLoginBtn').onclick = doLogin;
+    $('#adminPass').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doLogin(); });
+    $('#mOk').onclick = ()=> $('#modal').classList.add('hidden');
 
-            // Auto-login if previously logged in
-            if (localStorage.getItem('isLoggedIn') === '1') {
-                state.userId = 'admin';
-                loginOverlay.classList.add('hidden');
-                mainApp.classList.remove('hidden');
-                mainApp.style.display = 'flex';
-                initAfterLogin();
-            }
-
-            // Handle hash navigation after login
-            window.addEventListener('hashchange', () => {
-                const newView = window.location.hash.replace('#', '') || 'dashboard';
-                if (localStorage.getItem('isLoggedIn') === '1') {
-                    navigate(newView);
-                }
-            });
-        });
-    </script>
+    if(localStorage.getItem('lc_logged')==='1'){
+      $('#loginOverlay').classList.add('hidden'); $('#app').classList.remove('hidden'); initAfterLogin();
+    }else{
+      $('#app').classList.add('hidden');
+    }
+    render(); // initial
+  </script>
 </body>
 </html>
